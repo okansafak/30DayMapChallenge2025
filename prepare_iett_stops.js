@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// Better CSV parse function handling quoted fields
+// Simple CSV parse function
 function parseCSV(filePath) {
     let content = fs.readFileSync(filePath, 'utf-8');
     
@@ -46,85 +46,49 @@ function parseCSV(filePath) {
     return data;
 }
 
-// Fix Turkish character encoding issues - more comprehensive
-function fixTurkishChars(text) {
-    if (!text) return text;
-    
-    const replacements = {
-        'Ä°': 'İ',
-        'Ä±': 'ı',
-        'ÅŸ': 'ş',
-        'Åž': 'Ş',
-        'Ä': 'ğ',
-        'Äž': 'Ğ',
-        'Ã¼': 'ü',
-        'Ãœ': 'Ü',
-        'Ã¶': 'ö',
-        'Ã–': 'Ö',
-        'Ã§': 'ç',
-        'Ã‡': 'Ç',
-        '�': 'İ', // Common replacement for İ
-        'ý': 'ı',
-        'þ': 'ş',
-        'Þ': 'Ş',
-        'ð': 'ğ',
-        'Ð': 'Ğ',
-        // Additional problematic encodings
-        'Ä°skele': 'İskele',
-        'Ä°H.': 'İH.',
-        'Ä°ETT': 'İETT',
-        'Ä°stanbul': 'İstanbul'
-    };
-    
-    let fixed = text;
-    Object.keys(replacements).forEach(key => {
-        const regex = new RegExp(key, 'g');
-        fixed = fixed.replace(regex, replacements[key]);
-    });
-    
-    return fixed;
-}
+console.log('=== İETT Durak Verisi Oluşturuluyor ===\n');
 
-console.log('Processing IETT stops data...');
-
-// Read stops data
+// Read stops
 const stopsFile = path.join(__dirname, 'data', 'ist_gtfs', 'stops.csv');
-const stops = parseCSV(stopsFile);
+const allStops = parseCSV(stopsFile);
 
-console.log(`Total stops: ${stops.length}`);
+console.log(`Toplam durak (GTFS): ${allStops.length}`);
 
-// Filter based ONLY on coordinates - no name checking
-// This avoids all encoding issues
-const landStops = stops.filter(stop => {
+// Filter strategy:
+// 1. Use coordinates to stay in Istanbul main area
+// 2. Exclude ferry stops by stop_code (20xxxx)
+// 3. No name filtering to avoid encoding issues
+
+const filteredStops = allStops.filter(stop => {
     const lat = parseFloat(stop.stop_lat);
     const lon = parseFloat(stop.stop_lon);
     const stopId = stop.stop_id;
+    const stopCode = stop.stop_code || '';
     
-    // Basic validation - must have ID and valid coordinates
+    // Basic validation
     if (!stopId || isNaN(lat) || isNaN(lon)) {
         return false;
     }
     
-    // Filter by coordinates only
-    // Istanbul metropolitan area extended boundaries
-    // Exclude outlier areas (far east/west suburbs)
-    const inMainArea = lat > 40.75 && lat < 41.35 && lon > 28.45 && lon < 29.55;
+    // Istanbul main metropolitan area
+    // Slightly tighter bounds to focus on main city
+    if (lat < 40.80 || lat > 41.30 || lon < 28.50 || lon > 29.50) {
+        return false;
+    }
     
-    // Additional filter: exclude obvious sea/ferry coordinates
-    // Ferries are typically at sea level and specific coordinates
-    const isLikelyFerry = (
-        (lon > 29.00 && lon < 29.15 && lat > 40.85 && lat < 41.15) || // Bosphorus line
-        (lon > 28.95 && lon < 29.05 && lat > 40.98 && lat < 41.05)    // Golden Horn
-    ) && stop.stop_code && stop.stop_code.toString().startsWith('2000'); // Ferry codes
+    // Exclude ferry stops (stop_code starts with 2000)
+    // These are Şehir Hatları stops
+    if (stopCode.startsWith('2000')) {
+        return false;
+    }
     
-    return inMainArea && !isLikelyFerry;
+    return true;
 });
 
-console.log(`Land transport stops: ${landStops.length}`);
+console.log(`Filtrelenmiş duraklar: ${filteredStops.length}`);
 
-// Convert to GeoJSON
-// Store only IDs and coordinates, no names to avoid encoding issues
-const features = landStops.map(stop => {
+// Convert to GeoJSON - NO NAMES to avoid encoding issues
+const features = filteredStops.map(stop => {
     const lat = parseFloat(stop.stop_lat);
     const lon = parseFloat(stop.stop_lon);
     
@@ -147,9 +111,15 @@ const geojson = {
     features: features
 };
 
-// Save to file
+// Save
 const outputFile = path.join(__dirname, 'data', 'iett_stops.geojson');
 fs.writeFileSync(outputFile, JSON.stringify(geojson, null, 2));
 
-console.log(`Saved ${features.length} stops to ${outputFile}`);
-console.log('Done!');
+const wheelchairCount = features.filter(f => f.properties.wheelchair === 1).length;
+
+console.log(`\n✅ Başarıyla kaydedildi: ${outputFile}`);
+console.log(`📊 Toplam durak: ${features.length}`);
+console.log(`♿ Erişilebilir durak: ${wheelchairCount}`);
+console.log(`🚫 Vapur iskelesi hariç (2000xx kodlar)`);
+console.log(`📝 İsim alanı yok (encoding sorunları önlendi)`);
+console.log('\nTamamlandı!');
