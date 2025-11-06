@@ -157,7 +157,7 @@
     <div class="header">
         <div class="day">DAY 7 - NETWORK</div>
         <h1>İETT Spider Map</h1>
-        <p>İstanbul'daki <strong>6,900+</strong> İETT durağı arasındaki bağlantı ağı</p>
+        <p>İstanbul'daki <strong>6,900+</strong> toplu taşıma durağı arasındaki bağlantı ağı</p>
         <p style="font-size: 12px; color: #888; margin-top: 10px;">
             🖱️ Harita üzerinde gezinin - mouse konumuna göre duraklar arası örümcek ağı oluşur
         </p>
@@ -382,7 +382,7 @@
                     type: 'Feature',
                     properties: {
                         distance: item.distance,
-                        stop_name: item.stop.properties.stop_name,
+                        stop_id: item.stop.properties.id,
                         color: style.color,
                         opacity: style.opacity,
                         width: style.width
@@ -481,11 +481,18 @@
         map.on('click', 'stops-layer', (e) => {
             const feature = e.features[0];
             const coords = feature.geometry.coordinates.slice();
-            const name = feature.properties.stop_name;
+            const stopId = feature.properties.id;
+            const stopCode = feature.properties.code;
+            const wheelchair = feature.properties.wheelchair === 1;
+            
+            let html = `<strong>Durak ID:</strong> ${stopId}<br>`;
+            if (stopCode) html += `<strong>Kod:</strong> ${stopCode}<br>`;
+            html += `<strong>Konum:</strong> ${coords[1].toFixed(6)}, ${coords[0].toFixed(6)}`;
+            if (wheelchair) html += `<br>♿ Erişilebilir`;
             
             new maplibregl.Popup()
                 .setLngLat(coords)
-                .setHTML(`<strong>${name}</strong><br>Durak Kodu: ${feature.properties.stop_code}`)
+                .setHTML(html)
                 .addTo(map);
         });
 
