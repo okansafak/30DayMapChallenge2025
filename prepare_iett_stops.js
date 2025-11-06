@@ -46,49 +46,37 @@ function parseCSV(filePath) {
     return data;
 }
 
-console.log('=== İETT Durak Verisi Oluşturuluyor ===\n');
+console.log('=== İETT Otobüs Durak Verisi (stops_iett.csv) ===\n');
 
-// Read stops
-const stopsFile = path.join(__dirname, 'data', 'ist_gtfs', 'stops.csv');
-const allStops = parseCSV(stopsFile);
+// Read İETT stops directly
+const stopsFile = path.join(__dirname, 'data', 'ist_gtfs', 'stops_iett.csv');
+const iettStops = parseCSV(stopsFile);
 
-console.log(`Toplam durak (GTFS): ${allStops.length}`);
+console.log(`Toplam İETT durağı: ${iettStops.length}`);
 
-// Filter strategy:
-// 1. Use coordinates to stay in Istanbul main area
-// 2. Exclude ferry stops by stop_code (20xxxx)
-// 3. No name filtering to avoid encoding issues
-
-const filteredStops = allStops.filter(stop => {
+// Filter for valid coordinates
+const validStops = iettStops.filter(stop => {
     const lat = parseFloat(stop.stop_lat);
     const lon = parseFloat(stop.stop_lon);
     const stopId = stop.stop_id;
-    const stopCode = stop.stop_code || '';
     
     // Basic validation
     if (!stopId || isNaN(lat) || isNaN(lon)) {
         return false;
     }
     
-    // Istanbul main metropolitan area
-    // Slightly tighter bounds to focus on main city
-    if (lat < 40.80 || lat > 41.30 || lon < 28.50 || lon > 29.50) {
-        return false;
-    }
-    
-    // Exclude ferry stops (stop_code starts with 2000)
-    // These are Şehir Hatları stops
-    if (stopCode.startsWith('2000')) {
+    // Must be in reasonable Istanbul area
+    if (lat < 40.5 || lat > 41.5 || lon < 28.0 || lon > 30.0) {
         return false;
     }
     
     return true;
 });
 
-console.log(`Filtrelenmiş duraklar: ${filteredStops.length}`);
+console.log(`Geçerli koordinatlı durak: ${validStops.length}`);
 
 // Convert to GeoJSON - NO NAMES to avoid encoding issues
-const features = filteredStops.map(stop => {
+const features = validStops.map(stop => {
     const lat = parseFloat(stop.stop_lat);
     const lon = parseFloat(stop.stop_lon);
     
@@ -97,7 +85,8 @@ const features = filteredStops.map(stop => {
         properties: {
             id: stop.stop_id,
             code: stop.stop_code || '',
-            wheelchair: stop.wheelchair_boarding === '1' ? 1 : 0
+            // Note: wheelchair_boarding field doesn't exist in stops_iett.csv
+            wheelchair: 0
         },
         geometry: {
             type: 'Point',
@@ -115,11 +104,8 @@ const geojson = {
 const outputFile = path.join(__dirname, 'data', 'iett_stops.geojson');
 fs.writeFileSync(outputFile, JSON.stringify(geojson, null, 2));
 
-const wheelchairCount = features.filter(f => f.properties.wheelchair === 1).length;
-
 console.log(`\n✅ Başarıyla kaydedildi: ${outputFile}`);
-console.log(`📊 Toplam durak: ${features.length}`);
-console.log(`♿ Erişilebilir durak: ${wheelchairCount}`);
-console.log(`🚫 Vapur iskelesi hariç (2000xx kodlar)`);
+console.log(`📊 Toplam İETT otobüs durağı: ${features.length}`);
+console.log(`🚌 Sadece otobüs durakları (metro/marmaray/vapur hariç)`);
 console.log(`📝 İsim alanı yok (encoding sorunları önlendi)`);
 console.log('\nTamamlandı!');
