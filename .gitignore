@@ -1,0 +1,6 @@
+node_modules/
+*.log
+.DS_Store
+.vscode/
+data/spacetime_cube_data.geojson
+data/ist_gtfs/stop_times.csv
