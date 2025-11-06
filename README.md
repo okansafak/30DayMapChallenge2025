@@ -25,6 +25,11 @@ Raster veri görselleştirmesi.
 
 İstanbul'un metro, tramvay ve banliyö tren sistemlerinin günlük hareketlerini gösteren interaktif animasyon haritası.
 
+### Day 7: Network 🕷️
+**İETT Spider Map - İnteraktif Durak Ağı**
+
+İstanbul'daki 6,900+ İETT durağı arasındaki bağlantı ağını mouse konumuna göre dinamik olarak görselleştiren spider map.
+
 - 📁 Dosya: `maps/day06.html`
 - 🔧 Veri İşleme: `prepare_metro_from_gtfs.js`
 
@@ -60,6 +65,45 @@ node prepare_metro_from_gtfs.js
 ```
 
 **Not:** `spacetime_cube_data.geojson` dosyası (~207MB) GitHub'da bulunmamaktadır. Lokal olarak `prepare_metro_from_gtfs.js` scripti çalıştırılarak oluşturulmalıdır.
+
+---
+
+### Day 7 - Detaylı Bilgi
+
+- 📁 Dosya: `maps/day07.html`
+- 🔧 Veri İşleme: `prepare_iett_stops.js`
+
+#### Özellikler
+- ✅ **6,900+ İETT durağı** gerçek konum verileri
+- ✅ **Mouse konumuna göre dinamik spider web**: Harita üzerinde gezinirken en yakın duraklara çizgiler çizilir
+- ✅ **Mesafe bazlı renklendirme**: 
+  - Yeşil (0-500m) → Turuncu (500m-1km) → Kırmızı (1-2km) → Koyu Kırmızı (3km+)
+- ✅ **Ayarlanabilir parametreler**:
+  - Maksimum mesafe (500m - 5km)
+  - Maksimum bağlantı sayısı (10-200 durak)
+- ✅ **Canlı istatistikler**: Aktif bağlantı ve en yakın durak mesafesi
+- ✅ **İnteraktif popup'lar**: Durak isimleri ve kodları
+
+#### Veri Kaynağı
+[İBB Açık Veri Portalı](https://data.ibb.gov.tr) - GTFS stops.csv
+
+#### Teknik Detaylar
+- **MapLibre GL JS** v3.6.2
+- **Haversine Formula**: Gerçek coğrafi mesafe hesaplama
+- **Real-time Line Generation**: Mouse hareketine göre anlık çizgi oluşturma
+- **Distance-based Styling**: Mesafeye göre renk, kalınlık ve opacity
+
+#### Kurulum ve Çalıştırma
+
+```bash
+# İETT durakları verisini hazırla
+node prepare_iett_stops.js
+
+# Haritayı tarayıcıda aç
+# maps/day07.html dosyasını bir web tarayıcısında açın
+```
+
+**Not:** `iett_stops.geojson` dosyası GitHub'da bulunmamaktadır. Lokal olarak `prepare_iett_stops.js` scripti çalıştırılarak oluşturulmalıdır.
 
 ## 📊 Veri Setleri
 

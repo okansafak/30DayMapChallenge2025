@@ -4,3 +4,4 @@ node_modules/
 .vscode/
 data/spacetime_cube_data.geojson
 data/ist_gtfs/stop_times.csv
+data/iett_stops.geojson
