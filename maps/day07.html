@@ -86,11 +86,23 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             z-index: 1;
             font-size: 13px;
+            max-width: 280px;
         }
         .legend h3 {
             margin: 0 0 10px 0;
             font-size: 14px;
             color: #333;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 5px;
+        }
+        .legend-section {
+            margin: 15px 0;
+        }
+        .legend-section-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
         }
         .legend-item {
             display: flex;
@@ -102,6 +114,17 @@
             height: 3px;
             margin-right: 10px;
             border-radius: 2px;
+        }
+        .legend-symbol {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            flex-shrink: 0;
         }
         .legend-label {
             color: #666;
@@ -175,26 +198,46 @@
     </div>
 
     <div class="legend">
-        <h3>Bağlantı Mesafesi</h3>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #27ae60; opacity: 0.9;"></div>
-            <span class="legend-label">0-500m (Çok Yakın)</span>
+        <h3>Bağlantı & Duraklar</h3>
+        
+        <div class="legend-section">
+            <div class="legend-section-title">Bağlantı Mesafesi</div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #27ae60; opacity: 0.9;"></div>
+                <span class="legend-label">0-500m</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f39c12; opacity: 0.8;"></div>
+                <span class="legend-label">500m-1km</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e67e22; opacity: 0.7;"></div>
+                <span class="legend-label">1-2km</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e74c3c; opacity: 0.5;"></div>
+                <span class="legend-label">2-3km</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #c0392b; opacity: 0.3;"></div>
+                <span class="legend-label">3km+</span>
+            </div>
         </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #f39c12; opacity: 0.8;"></div>
-            <span class="legend-label">500m-1km (Yakın)</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #e67e22; opacity: 0.7;"></div>
-            <span class="legend-label">1-2km (Orta)</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #e74c3c; opacity: 0.5;"></div>
-            <span class="legend-label">2-3km (Uzak)</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #c0392b; opacity: 0.3;"></div>
-            <span class="legend-label">3km+ (Çok Uzak)</span>
+
+        <div class="legend-section">
+            <div class="legend-section-title">Durak Türleri</div>
+            <div class="legend-item">
+                <div class="legend-symbol" style="background: #3498db; border: 1px solid #2980b9;">
+                    <span style="color: white; font-size: 8px;">●</span>
+                </div>
+                <span class="legend-label">Standart Durak</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-symbol" style="background: #2ecc71; border: 2px solid #27ae60;">
+                    <span style="color: white; font-weight: bold;">♿</span>
+                </div>
+                <span class="legend-label">Erişilebilir Durak</span>
+            </div>
         </div>
     </div>
 
@@ -259,10 +302,12 @@
                         data: data
                     });
 
+                    // Regular stops
                     map.addLayer({
                         id: 'stops-layer',
                         type: 'circle',
                         source: 'stops',
+                        filter: ['==', ['get', 'wheelchair'], 0],
                         paint: {
                             'circle-radius': 3,
                             'circle-color': '#3498db',
@@ -270,6 +315,22 @@
                             'circle-stroke-width': 1,
                             'circle-stroke-color': '#2980b9',
                             'circle-stroke-opacity': 0.8
+                        }
+                    });
+
+                    // Wheelchair accessible stops - larger and different color
+                    map.addLayer({
+                        id: 'stops-wheelchair-layer',
+                        type: 'circle',
+                        source: 'stops',
+                        filter: ['==', ['get', 'wheelchair'], 1],
+                        paint: {
+                            'circle-radius': 5,
+                            'circle-color': '#2ecc71',
+                            'circle-opacity': 0.8,
+                            'circle-stroke-width': 2,
+                            'circle-stroke-color': '#27ae60',
+                            'circle-stroke-opacity': 1
                         }
                     });
 
@@ -477,33 +538,42 @@
             }
         });
 
-        // Add popup on stop click
-        map.on('click', 'stops-layer', (e) => {
-            const feature = e.features[0];
-            const coords = feature.geometry.coordinates.slice();
-            const stopId = feature.properties.id;
-            const stopCode = feature.properties.code;
-            const wheelchair = feature.properties.wheelchair === 1;
-            
-            let html = `<strong>Durak ID:</strong> ${stopId}<br>`;
-            if (stopCode) html += `<strong>Kod:</strong> ${stopCode}<br>`;
-            html += `<strong>Konum:</strong> ${coords[1].toFixed(6)}, ${coords[0].toFixed(6)}`;
-            if (wheelchair) html += `<br>♿ Erişilebilir`;
-            
-            new maplibregl.Popup()
-                .setLngLat(coords)
-                .setHTML(html)
-                .addTo(map);
-        });
+        // Add popup on stop click - for both layers
+        const addPopupHandler = (layerId) => {
+            map.on('click', layerId, (e) => {
+                const feature = e.features[0];
+                const coords = feature.geometry.coordinates.slice();
+                const stopId = feature.properties.id;
+                const stopCode = feature.properties.code;
+                const wheelchair = feature.properties.wheelchair === 1;
+                
+                let html = `<div style="min-width: 150px;">`;
+                html += `<strong>Durak ID:</strong> ${stopId}<br>`;
+                if (stopCode) html += `<strong>Kod:</strong> ${stopCode}<br>`;
+                html += `<strong>Konum:</strong><br>${coords[1].toFixed(6)}, ${coords[0].toFixed(6)}`;
+                if (wheelchair) {
+                    html += `<br><div style="margin-top: 8px; padding: 5px; background: #d5f4e6; border-left: 3px solid #27ae60; font-weight: bold;">♿ Erişilebilir Durak</div>`;
+                }
+                html += `</div>`;
+                
+                new maplibregl.Popup()
+                    .setLngLat(coords)
+                    .setHTML(html)
+                    .addTo(map);
+            });
 
-        // Change cursor on hover
-        map.on('mouseenter', 'stops-layer', () => {
-            map.getCanvas().style.cursor = 'pointer';
-        });
+            // Change cursor on hover
+            map.on('mouseenter', layerId, () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
 
-        map.on('mouseleave', 'stops-layer', () => {
-            map.getCanvas().style.cursor = '';
-        });
+            map.on('mouseleave', layerId, () => {
+                map.getCanvas().style.cursor = '';
+            });
+        };
+
+        addPopupHandler('stops-layer');
+        addPopupHandler('stops-wheelchair-layer');
     </script>
 </body>
 </html>
