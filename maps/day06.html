@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gün 06: Dimensions - İstanbul Raylı Sistem Zaman Animasyonu</title></title>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: #0a0e27;
+        }
+        #map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        .header {
+            position: absolute; top: 20px; left: 20px; background: rgba(10, 14, 39, 0.9);
+            color: #fff; padding: 20px 25px; border-radius: 12px; z-index: 10;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 350px;
+        }
+        .header h1 { margin: 0 0 8px 0; font-size: 20px; color: #4fc3f7; }
+        .header p { margin: 0; font-size: 13px; color: #aaa; line-height: 1.5; }
+        
+        .time-control {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(10, 14, 39, 0.95); color: #fff; padding: 20px 30px;
+            border-radius: 16px; z-index: 10; backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1); min-width: 500px;
+        }
+        
+        .time-display {
+            text-align: center; font-size: 32px; font-weight: 700;
+            color: #4fc3f7; margin-bottom: 15px; font-variant-numeric: tabular-nums;
+        }
+        
+        .controls {
+            display: flex; gap: 10px; align-items: center; justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            background: rgba(79, 195, 247, 0.2); border: 1px solid #4fc3f7;
+            color: #4fc3f7; padding: 8px 16px; border-radius: 8px;
+            cursor: pointer; font-size: 14px; font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn:hover { background: rgba(79, 195, 247, 0.3); }
+        .btn.active { background: #4fc3f7; color: #0a0e27; }
+        
+        .slider-container { display: flex; align-items: center; gap: 15px; }
+        .slider-label { font-size: 13px; color: #aaa; min-width: 80px; }
+        
+        input[type="range"] {
+            flex: 1; height: 6px; border-radius: 3px; outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px;
+            border-radius: 50%; background: #4fc3f7; cursor: pointer;
+        }
+        
+        .stats {
+            text-align: center; font-size: 12px; color: #666;
+            margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .counter {
+            position: absolute; bottom: 30px; left: 30px;
+            background: rgba(10, 14, 39, 0.95); color: #fff;
+            padding: 20px 30px; border-radius: 16px; z-index: 10;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center; min-width: 250px;
+        }
+        .counter-title {
+            font-size: 12px; color: #888; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 10px;
+        }
+        .counter-value {
+            font-size: 48px; font-weight: 700; color: #4fc3f7;
+            font-variant-numeric: tabular-nums; line-height: 1;
+        }
+        .counter-label {
+            font-size: 14px; color: #aaa; margin-top: 8px;
+        }
+        .counter-details {
+            margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px; color: #666;
+        }
+        .counter-detail-item {
+            display: flex; justify-content: space-between;
+            margin: 4px 0; font-size: 12px;
+        }
+        .counter-detail-label { color: #888; }
+        .counter-detail-value { color: #4fc3f7; font-weight: 600; }
+        
+        .counter-summary {
+            display: flex; justify-content: space-around;
+            margin: 15px -10px 10px -10px; gap: 10px;
+        }
+        .counter-summary-item {
+            flex: 1; text-align: center;
+            padding: 10px; background: rgba(79, 195, 247, 0.1);
+            border-radius: 8px;
+        }
+        .counter-summary-value {
+            font-size: 24px; font-weight: 700; color: #4fc3f7;
+            line-height: 1;
+        }
+        .counter-summary-label {
+            font-size: 10px; color: #888; margin-top: 4px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        
+        .legend {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(10, 14, 39, 0.95); color: #fff;
+            padding: 15px 20px; border-radius: 12px; z-index: 10;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 280px; max-height: 80vh; overflow-y: auto;
+        }
+        .legend h3 {
+            margin: 0 0 12px 0; font-size: 14px; color: #4fc3f7;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .legend-item {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 8px; font-size: 12px;
+        }
+        .legend-color {
+            width: 20px; height: 20px; border-radius: 50%;
+            border: 2px solid #fff; flex-shrink: 0;
+        }
+        .legend-label {
+            flex: 1; line-height: 1.3;
+        }
+        .legend-category {
+            font-size: 11px; color: #888; margin: 12px 0 6px 0;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        
+        #loader {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0e27; z-index: 20; display: flex; align-items: center;
+            justify-content: center; flex-direction: column; color: #fff;
+        }
+        .loader-spinner { 
+            border: 3px solid rgba(79, 195, 247, 0.3);
+            border-top: 3px solid #4fc3f7; border-radius: 50%;
+            width: 50px; height: 50px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-text { font-size: 16px; margin-top: 20px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Metro & tramvay verileri yükleniyor...</div>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="header">
+        <h1>İstanbul Raylı Sistem</h1>
+        <p>Gerçek GTFS verilerinden 24 saat animasyon. 10,902 metro, tramvay ve füniküler seferi.</p>
+        <div style="margin-top: 10px; font-size: 11px; color: #888; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+            📊 Veri Kaynağı: <a href="https://data.ibb.gov.tr/dataset/public-transport-gtfs-data" target="_blank" style="color: #4fc3f7; text-decoration: none;">İBB Açık Veri Portalı</a>
+        </div>
+    </div>
+    
+    <div class="legend" id="legend">
+        <h3>🚇 Hatlar</h3>
+        <div id="legendContent">Yükleniyor...</div>
+    </div>
+    
+    <div class="counter">
+        <div class="counter-title">Sefer İstatistikleri</div>
+        
+        <div class="counter-summary">
+            <div class="counter-summary-item">
+                <div class="counter-summary-value" id="activeTripsCount">0</div>
+                <div class="counter-summary-label">Aktif Sefer</div>
+            </div>
+            <div class="counter-summary-item">
+                <div class="counter-summary-value" id="totalTripsCount">0</div>
+                <div class="counter-summary-label">Toplam Sefer</div>
+            </div>
+        </div>
+        
+        <div class="counter-details">
+            <div class="counter-detail-item">
+                <span class="counter-detail-label">🚇 Metro</span>
+                <span class="counter-detail-value" id="metroCount">0</span>
+            </div>
+            <div class="counter-detail-item">
+                <span class="counter-detail-label">🚊 Tramvay</span>
+                <span class="counter-detail-value" id="tramCount">0</span>
+            </div>
+            <div class="counter-detail-item">
+                <span class="counter-detail-label">🚡 Füniküler</span>
+                <span class="counter-detail-value" id="funicularCount">0</span>
+            </div>
+            <div class="counter-detail-item">
+                <span class="counter-detail-label">🚆 Marmaray</span>
+                <span class="counter-detail-value" id="marmarayCount">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="time-control">
+        <div class="time-display" id="timeDisplay">00:00:00</div>
+        <div class="controls">
+            <button class="btn" onclick="changeSpeed(-1)">⏪ Yavaş</button>
+            <button class="btn active" id="playBtn" onclick="togglePlay()">⏸ Duraklat</button>
+            <button class="btn" onclick="changeSpeed(1)">⏩ Hızlı</button>
+            <button class="btn" onclick="resetTime()">↻ Sıfırla</button>
+        </div>
+        <div class="slider-container">
+            <span class="slider-label">00:00</span>
+            <input type="range" id="timeSlider" min="0" max="86400" value="0" step="60">
+            <span class="slider-label">24:00</span>
+        </div>
+        <div class="stats">
+            <span id="vehicleCount">0</span> aktif araç | 
+            Hız: <span id="speedDisplay">1x</span>
+        </div>
+    </div>
+
+    <script>
+        // Haritayı oluştur
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {
+                    'carto-dark': {
+                        type: 'raster',
+                        tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
+                        tileSize: 256
+                    }
+                },
+                layers: [{ id: 'carto-dark-layer', type: 'raster', source: 'carto-dark' }]
+            },
+            center: [29.0, 41.05],
+            zoom: 10,
+            pitch: 45,
+            bearing: 0
+        });
+
+        // Global değişkenler
+        let tripData = [];
+        let currentTime = 0; // 00:00 (saniye cinsinden)
+        let isPlaying = true;
+        let speed = 1; // 1x, 2x, 4x, 8x
+        let animationId = null;
+
+        // Zaman fonksiyonları
+        function secondsToTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function interpolatePosition(trip, time) {
+            const coords = trip.geometry.coordinates;
+            
+            // Zamanın rota üzerindeki konumunu bul
+            for (let i = 0; i < coords.length - 1; i++) {
+                const startTime = coords[i][2];
+                const endTime = coords[i + 1][2];
+                
+                if (time >= startTime && time <= endTime) {
+                    const progress = (time - startTime) / (endTime - startTime);
+                    const lon = coords[i][0] + (coords[i + 1][0] - coords[i][0]) * progress;
+                    const lat = coords[i][1] + (coords[i + 1][1] - coords[i][1]) * progress;
+                    return [lon, lat];
+                }
+            }
+            return null;
+        }
+
+        // Harita yüklenince
+        map.on('load', async () => {
+            try {
+                // GTFS verilerini yükle
+                const response = await fetch('../data/spacetime_cube_data.geojson');
+                const data = await response.json();
+                tripData = data.features;
+                
+                // Toplam sefer sayısını göster
+                document.getElementById('totalTripsCount').textContent = tripData.length.toLocaleString();
+                
+                // Lejantı oluştur
+                createLegend();
+                
+                document.getElementById('loader').style.display = 'none';
+                
+                // Rota çizgilerini ekle (arka plan)
+                map.addSource('routes', {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: tripData.map(trip => ({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: trip.geometry.coordinates.map(c => [c[0], c[1]])
+                            },
+                            properties: {
+                                color: trip.properties.color
+                            }
+                        }))
+                    }
+                });
+                
+                map.addLayer({
+                    id: 'routes-layer',
+                    type: 'line',
+                    source: 'routes',
+                    paint: {
+                        'line-color': ['get', 'color'],
+                        'line-width': 1.5,
+                        'line-opacity': 0.4
+                    }
+                });
+                
+                // Araç noktaları için kaynak
+                map.addSource('vehicles', {
+                    type: 'geojson',
+                    data: { type: 'FeatureCollection', features: [] }
+                });
+                
+                map.addLayer({
+                    id: 'vehicles-layer',
+                    type: 'circle',
+                    source: 'vehicles',
+                    paint: {
+                        'circle-radius': 5,
+                        'circle-color': ['get', 'color'],
+                        'circle-opacity': 0.95,
+                        'circle-stroke-width': 1.5,
+                        'circle-stroke-color': '#fff',
+                        'circle-blur': 0.15
+                    }
+                });
+                
+                // Animasyonu başlat
+                animate();
+                
+            } catch (error) {
+                document.getElementById('loader').innerHTML = 
+                    `<div class="loader-text" style="color: #ff4444;">Hata: ${error.message}</div>`;
+            }
+        });
+
+        // Animasyon döngüsü
+        function animate() {
+            if (isPlaying) {
+                currentTime += speed * 10; // Her frame'de 10 saniye ilerle
+                
+                if (currentTime > 86400) currentTime = 0; // Gece yarısından sonra başa dön
+                
+                updateVehicles();
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Araçları güncelle
+        function updateVehicles() {
+            const vehicles = [];
+            let metroCount = 0;
+            let tramCount = 0;
+            let funicularCount = 0;
+            let marmarayCount = 0;
+            let activeTripsCount = 0;
+            
+            for (const trip of tripData) {
+                const position = interpolatePosition(trip, currentTime);
+                if (position) {
+                    const routeId = trip.properties.route_short_name || trip.properties.route_id;
+                    
+                    vehicles.push({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: position },
+                        properties: { 
+                            route_id: routeId,
+                            color: trip.properties.color
+                        }
+                    });
+                    
+                    activeTripsCount++;
+                    
+                    // Kategorilere göre say
+                    if (routeId.includes('Marmaray')) {
+                        marmarayCount++;
+                    } else if (routeId.startsWith('T')) {
+                        tramCount++;
+                    } else if (routeId.startsWith('F') || routeId.startsWith('TF')) {
+                        funicularCount++;
+                    } else if (routeId.startsWith('M')) {
+                        metroCount++;
+                    }
+                }
+            }
+            
+            map.getSource('vehicles').setData({
+                type: 'FeatureCollection',
+                features: vehicles
+            });
+            
+            // UI'ı güncelle
+            document.getElementById('timeDisplay').textContent = secondsToTime(currentTime);
+            document.getElementById('timeSlider').value = currentTime;
+            document.getElementById('vehicleCount').textContent = vehicles.length;
+            
+            // Counter güncelle
+            document.getElementById('activeTripsCount').textContent = activeTripsCount.toLocaleString();
+            document.getElementById('metroCount').textContent = metroCount;
+            document.getElementById('tramCount').textContent = tramCount;
+            document.getElementById('funicularCount').textContent = funicularCount;
+            document.getElementById('marmarayCount').textContent = marmarayCount;
+        }
+
+        // Kontrol fonksiyonları
+        function createLegend() {
+            const routesMap = new Map();
+            
+            // Hat isimlerini Türkçe düzelt
+            const routeNameMap = {
+                'M1A': 'Yenikapı - Atatürk Havalimanı',
+                'M1B': 'Yenikapı - Kirazlı',
+                'M2': 'Yenikapı - Hacıosman',
+                'M2A': 'Sanayi Mahallesi - Seyrantepe',
+                'M3': 'Kirazlı - Olimpiyat - Başakşehir',
+                'M3A': 'İkitelli Sanayi - Olimpiyat',
+                'M4': 'Kadıköy - Tavşantepe',
+                'M5': 'Üsküdar - Çekmeköy',
+                'M6': 'Levent - Boğaziçi Ü./Hisarüstü',
+                'M7': 'Yıldız - Mahmutbey',
+                'M8': 'Bostancı - Dudullu',
+                'M9': 'Bahariye - Olimpiyat',
+                'M11': 'Gayrettepe - İstanbul Havalimanı',
+                'T1': 'Bağcılar - Kabataş',
+                'T3': 'Kadıköy - Moda',
+                'T4': 'Topkapı - Mescid-i Selam',
+                'F1': 'Taksim - Kabataş',
+                'F2': 'Karaköy - Beyoğlu',
+                'F3': 'Seyrantepe - Vadistanbul',
+                'TF1': 'Maçka - Taşkışla',
+                'TF2': 'Eyüp - Pierre Loti Teleferik',
+                'Marmaray': 'Gebze - Halkalı (Ana Hat)',
+                'Marmaray1': 'Sütlüce - Zeytinburnu',
+                'Marmaray2': 'Halkalı - Bahçeşehir'
+            };
+            
+            // Benzersiz hatları topla
+            tripData.forEach(trip => {
+                const routeId = trip.properties.route_short_name || trip.properties.route_id;
+                const color = trip.properties.color || '#4fc3f7';
+                const name = routeNameMap[routeId] || trip.properties.route_long_name || '';
+                
+                if (!routesMap.has(routeId)) {
+                    routesMap.set(routeId, { name: name, color: color });
+                }
+            });
+            
+            // Kategori ayır
+            const metro = [];
+            const tram = [];
+            const funicular = [];
+            const marmaray = [];
+            const other = [];
+            
+            routesMap.forEach((data, id) => {
+                if (id.startsWith('M')) metro.push({ id, ...data });
+                else if (id.startsWith('T')) tram.push({ id, ...data });
+                else if (id.startsWith('F') || id.startsWith('TF')) funicular.push({ id, ...data });
+                else if (id.includes('Marmaray')) marmaray.push({ id, ...data });
+                else other.push({ id, ...data });
+            });
+            
+            let html = '';
+            
+            if (metro.length > 0) {
+                html += '<div class="legend-category">Metro</div>';
+                metro.sort((a, b) => {
+                    const aNum = a.id.match(/\d+/) ? parseInt(a.id.match(/\d+/)[0]) : 999;
+                    const bNum = b.id.match(/\d+/) ? parseInt(b.id.match(/\d+/)[0]) : 999;
+                    return aNum - bNum;
+                }).forEach(r => {
+                    html += `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${r.color};"></div>
+                            <div class="legend-label">${r.id} ${r.name}</div>
+                        </div>`;
+                });
+            }
+            
+            if (tram.length > 0) {
+                html += '<div class="legend-category">Tramvay</div>';
+                tram.sort((a, b) => a.id.localeCompare(b.id)).forEach(r => {
+                    html += `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${r.color};"></div>
+                            <div class="legend-label">${r.id} ${r.name}</div>
+                        </div>`;
+                });
+            }
+            
+            if (funicular.length > 0) {
+                html += '<div class="legend-category">Füniküler</div>';
+                funicular.sort((a, b) => a.id.localeCompare(b.id)).forEach(r => {
+                    html += `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${r.color};"></div>
+                            <div class="legend-label">${r.id} ${r.name}</div>
+                        </div>`;
+                });
+            }
+            
+            if (marmaray.length > 0) {
+                html += '<div class="legend-category">Marmaray/Banliyö</div>';
+                marmaray.forEach(r => {
+                    html += `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${r.color};"></div>
+                            <div class="legend-label">${r.name || r.id}</div>
+                        </div>`;
+                });
+            }
+            
+            if (other.length > 0) {
+                html += '<div class="legend-category">Diğer</div>';
+                other.forEach(r => {
+                    html += `
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: ${r.color};"></div>
+                            <div class="legend-label">${r.id} ${r.name}</div>
+                        </div>`;
+                });
+            }
+            
+            document.getElementById('legendContent').innerHTML = html;
+        }
+        
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playBtn');
+            btn.textContent = isPlaying ? '⏸ Duraklat' : '▶ Oynat';
+            btn.classList.toggle('active');
+        }
+
+        function changeSpeed(direction) {
+            const speeds = [0.5, 1, 2, 4, 8, 16];
+            let index = speeds.indexOf(speed);
+            index = Math.max(0, Math.min(speeds.length - 1, index + direction));
+            speed = speeds[index];
+            document.getElementById('speedDisplay').textContent = speed + 'x';
+        }
+
+        function resetTime() {
+            currentTime = 0;
+            updateVehicles();
+        }
+
+        // Slider kontrolü
+        document.getElementById('timeSlider').addEventListener('input', (e) => {
+            currentTime = parseInt(e.target.value);
+            updateVehicles();
+        });
+    </script>
+</body>
+</html>

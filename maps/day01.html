@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gün 01: Points - İstanbul'un Gizemli Bekçileri</title>
+    <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
+    <style>
+        /* [ ÖNCEKİ CEVAPTAKİ TÜM CSS KODLARI BURAYA GELECEK ] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; overflow: hidden; background-color: #f0f2f5; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        .header { position: absolute; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); padding: 20px 30px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); z-index: 1; max-width: 360px; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .header h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+        .header p { font-size: 14px; color: #555; line-height: 1.5; }
+        .controls { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 1; }
+        .control-btn { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); width: 44px; height: 44px; border-radius: 12px; cursor: pointer; font-size: 18px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; color: #333; }
+        .control-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); background: white; }
+        .legend { position: absolute; bottom: 20px; right: 20px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); padding: 20px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); z-index: 1; max-width: 280px; max-height: 400px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .legend h3 { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; }
+        .legend-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: #444; }
+        .legend-icon { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .marker { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); border: 2px solid white; }
+        .marker:hover { transform: scale(1.15); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); }
+        .maplibregl-popup-content { padding: 20px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); min-width: 300px; font-size: 15px; border: 1px solid rgba(0, 0, 0, 0.05); }
+        .popup-title { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+        .popup-year { font-size: 13px; color: #666; margin-bottom: 14px; font-weight: 500; }
+        .popup-info { font-size: 14px; color: #444; line-height: 1.6; margin-bottom: 16px; }
+        .popup-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #f0f2f5; color: #333; padding: 10px 16px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 600; transition: all 0.2s ease; border: 1px solid #e0e0e0; }
+        .popup-btn:hover { background: #e9ecef; border-color: #ccc; transform: translateY(-1px); }
+        .popup-btn svg { width: 16px; height: 16px; }
+        
+        /* --- YENİ EKLENEN KOD --- */
+        .back-button {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            color: #333;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            z-index: 2;
+            transition: all 0.2s ease;
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <!-- YENİ EKLENEN BUTON -->
+    <a href="../index.html" class="back-button">❮ Ana Sayfa</a>
+
+    <div id="map"></div>
+    
+    <div class="header">
+        <h1>İstanbul'un Gizemli Bekçileri</h1>
+        <p>Şehrin kadim tılsımlarını, enerji hatlarını ve göksel sırları saklayan anıtlarını keşfedin.</p>
+    </div>
+
+    <!-- [ ÖNCEKİ CEVAPTAKİ TÜM DİĞER HTML VE SCRIPT KODLARI BURAYA GELECEK ] -->
+    <div class="controls"> <button class="control-btn" id="resetBtn" title="Başlangıç Görünümü">⟳</button> <button class="control-btn" id="toggle3D" title="2D/3D Geçişi">◰</button> </div>
+    <div class="legend"> <h3>Anıtlar ve Sırları</h3> <div class="legend-item"> <div class="legend-icon" style="background: #FCBF49;">🗼</div> <span>Kozmik Anten (Obelisk)</span> </div> <div class="legend-item"> <div class="legend-icon" style="background: #95E1D3;">🏛️</div> <span>İmparatorluk Tılsımı</span> </div> <div class="legend-item"> <div class="legend-icon" style="background: #4ECDC4;">📍</div> <span>Sıfır Noktası (Enerji Merkezi)</span> </div> <div class="legend-item"> <div class="legend-icon" style="background: #06FFA5;">🐍</div> <span>Koruyucu Tılsım</span> </div> <div class="legend-item"> <div class="legend-icon" style="background: #118AB2; opacity: 0.7;">🏛️</div> <span>Unutulmuş Anıt</span> </div> </div>
+    <script>
+        /* Önceki cevaptaki tüm JavaScript kodu buraya gelecek. */
+        const monuments = {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"name": "Milyon Taşı", "icon": "📍", "color": "#4ECDC4", "construction_year": "4. yüzyıl", "detailed_info": "Sadece bir başlangıç noktası değil, aynı zamanda şehrin mistik enerji ağının (ley hatları) kalbidir. Tüm mesafelerin ölçüldüğü bu anıtın, yeryüzü ve gökyüzü enerjilerini birleştiren bir merkez olduğuna inanılırdı. Şehrin kaderinin bu noktadan yönetildiği rivayet edilir."}, "geometry": {"type": "Point", "coordinates": [28.977778, 41.008056]}}, {"type": "Feature", "properties": {"name": "Çemberlitaş Sütunu", "icon": "🏛️", "color": "#EF476F", "construction_year": "MS 330", "detailed_info": "Şehrin en güçlü tılsımlarından biri olarak kabul edilir. Temelinde Hz. İsa'nın haçından parçalar gibi kutsal emanetlerin saklı olduğuna inanılır. Bu sütunun ayakta kalmasının, şehrin manevi korumasının devam ettiğine işaret ettiği söylenir. Yangınlardan aldığı yaralar, 'Yanık Sütun' olarak anılmasına ve gücünün sınandığına delalet eder."}, "geometry": {"type": "Point", "coordinates": [28.971111, 41.00861]}}, {"type": "Feature", "properties": {"name": "Yılanlı Sütun", "icon": "🐍", "color": "#06FFA5", "construction_year": "MÖ 479 (Yunanistan)", "detailed_info": "Delfi'nin kahinlerinden İstanbul'un Hipodromu'na taşınan bu anıt, şehri yılan, akrep ve veba gibi yer altı kötülüklerinden koruyan güçlü bir tılsımdır. Birbirine dolanmış üç yılan, kadim bilgeliği ve koruyucu gücü simgeler. Başlarının koparılmasının ardından tılsımın gücünün zayıfladığına inanılır."}, "geometry": {"type": "Point", "coordinates": [28.975, 41.005833]}}, {"type": "Feature", "properties": {"name": "Dikilitaş (Theodosius Obeliski)", "icon": "🗼", "color": "#FCBF49", "construction_year": "MÖ 1450 (Mısır)", "detailed_info": "Antik Mısır'ın gizemli bilgisini ve gücünü İstanbul'a taşıyan bir kozmik antendir. Üzerindeki hiyerogliflerin, sadece firavunun zaferlerini değil, aynı zamanda göksel olayları ve unutulmuş büyüleri anlattığına inanılır. Hipodrom'un merkezinde, şehrin enerjisini gökyüzüne bağladığı düşünülür."}, "geometry": {"type": "Point", "coordinates": [28.975278, 41.006111]}}, {"type": "Feature", "properties": {"name": "Örme Dikilitaş", "icon": "🗼", "color": "#AA96DA", "construction_year": "10. yüzyıl (Tahmini)", "detailed_info": "Hipodrom'un diğer ucundaki bu anıt, Theodosius Obeliski ile bir denge unsuru oluşturur. Bir zamanlar yüzeyini kaplayan yaldızlı tunç levhaların, sadece tarihi değil, aynı zamanda astrolojik semboller ve koruyucu dualar içerdiği, ancak Haçlı Seferleri'nde çalınarak sırlarının kaybolduğu rivayet edilir."}, "geometry": {"type": "Point", "coordinates": [28.97472, 41.00528]}}, {"type": "Feature", "properties": {"name": "Kız Taşı (Markianos Sütunu)", "icon": "🏛️", "color": "#95E1D3", "construction_year": "MS 455", "detailed_info": "Bir imparatorun zafer anıtı olmasının ötesinde, kişisel bir koruma tılsımı olduğuna inanılır. Efsaneye göre, imparatorun kızını yılanlardan ve büyülerden korumak için dikilmiştir. Bu sütunun etrafındaki alanın, negatif enerjilerden arındırıldığı söylenir."}, "geometry": {"type": "Point", "coordinates": [28.951318, 41.0166]}}, {"type": "Feature", "properties": {"name": "Gotlar Sütunu", "icon": "🏛️", "color": "#F38181", "construction_year": "3. veya 4. yüzyıl", "detailed_info": "Sarayburnu'nun ucunda, şehrin en eski ve en gizemli bekçilerinden biridir. Kimin tarafından dikildiği kesin olarak bilinmemesi, onun gücünü artırır. Şehre denizden gelebilecek tehlikelere karşı sessiz bir koruyucu ve bir enerji çapası olduğuna inanılır."}, "geometry": {"type": "Point", "coordinates": [28.985444, 41.0145]}}, {"type": "Feature", "properties": {"name": "Arkadius Sütunu (Kalıntı)", "icon": "🏛️", "color": "#118AB2", "construction_year": "MS 402", "detailed_info": "Bir zamanlar şehrin en görkemli tılsımlarından biri olan bu sütun, artık yıkılmış bir devdir. Evliya Çelebi'ye göre tepesindeki peri heykeli, yılda bir kez çığlık atarak kehanetlerde bulunur ve şehrin kaderini etkilerdi. Yıkılmasına rağmen kaidesinin hala eski gücün bir kısmını barındırdığına inanılır."}, "geometry": {"type": "Point", "coordinates": [28.94303, 41.00775]}}, {"type": "Feature", "properties": {"name": "Beşiktaş Dikili Taşı", "icon": "🏛️", "color": "#FF6B6B", "construction_year": "Tarihi belirsiz, Roma Dönemi", "detailed_info": "Şehrin en esrarengiz anıtlarından biridir. Ne zaman, neden ve kimin tarafından dikildiği bilinmemektedir. Bu belirsizlik, onun Boğaz'ın enerjisini düzenleyen ve şehre denizden giren ruhani kapıyı koruyan kadim bir işaret olduğu yönündeki söylentileri güçlendirir."}, "geometry": {"type": "Point", "coordinates": [29.0049, 41.0554]}}]};
+        const map = new maplibregl.Map({container: 'map', style: {version: 8, sources: {'carto-dark': {type: 'raster', tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'], tileSize: 256}}, layers: [{id: 'carto-dark-layer', type: 'raster', source: 'carto-dark', minzoom: 0, maxzoom: 22}]}, center: [28.978, 41.008], zoom: 12.5, pitch: 60, bearing: -17.6, antialias: true});
+        map.on('load', () => { map.addSource('mapbox-dem', {'type': 'raster-dem', 'url': 'https://demotiles.maplibre.org/terrain-tiles/tiles.json', 'tileSize': 256}); map.setTerrain({'source': 'mapbox-dem', 'exaggeration': 1.5}); monuments.features.sort((a, b) => a.properties.name.localeCompare(b.properties.name)).forEach((feature) => { const el = document.createElement('div'); el.className = 'marker'; el.style.backgroundColor = feature.properties.color; el.innerHTML = feature.properties.icon; const popup = new maplibregl.Popup({offset: 25, closeButton: true}).setHTML(`<div class="popup-title">${feature.properties.name}</div><div class="popup-year">Dikilme: ${feature.properties.construction_year}</div><div class="popup-info">${feature.properties.detailed_info}</div><div class="popup-actions"><a href="https://www.google.com/maps/dir/?api=1&destination=${feature.geometry.coordinates[1]},${feature.geometry.coordinates[0]}" target="_blank" class="popup-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> Konuma Git</a></div>`); new maplibregl.Marker({element: el}).setLngLat(feature.geometry.coordinates).setPopup(popup).addTo(map); }); });
+        document.getElementById('resetBtn').addEventListener('click', () => { map.flyTo({center: [28.978, 41.008], zoom: 12.5, pitch: 60, bearing: -17.6, duration: 2000}); });
+        let is3D = true; document.getElementById('toggle3D').addEventListener('click', () => { if (is3D) { map.easeTo({pitch: 0, bearing: 0, duration: 1000}); } else { map.easeTo({pitch: 60, bearing: -17.6, duration: 1000}); } is3D = !is3D; });
+        map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    </script>
+</body>
+</html>

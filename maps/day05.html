@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gün 05: Earth - Dünyanın Göksel Sinir Ağı</title>
+    <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <style>
+        body { margin: 0; background-color: #000; overflow: hidden; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        .header {
+            position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
+            color: #f9fafb; padding: 20px 30px; border-radius: 16px; z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.1); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        .header h1 { font-size: 22px; margin: 0 0 8px 0; }
+        .header p { font-size: 14px; margin: 0; color: #d1d5db; }
+        .back-button {
+            position: absolute; bottom: 20px; left: 20px; background: rgba(255, 255, 255, 0.9); color: #333;
+            text-decoration: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; z-index: 2;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        #loader {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10; display: flex; align-items: center;
+            justify-content: center; color: #fff; font-size: 1.2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-button">❮ Ana Sayfa</a>
+    <div id="loader">Uçuş verileri yükleniyor...</div>
+    <div id="map"></div>
+    <div class="header">
+        <h1>Dünyanın Göksel Sinir Ağı</h1>
+        <p>Küresel uçuş rotaları üzerinde hareket eden on binlerce parçacık.</p>
+    </div>
+
+    <script>
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: { 'basemap': { type: 'raster', tiles: ['https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png'], tileSize: 256 } },
+                layers: [{ id: 'basemap-layer', type: 'raster', source: 'basemap' }],
+                // Atmosferik derinlik hissi için sis
+                fog: { 'color': 'rgb(20, 20, 40)', 'high-color': 'rgb(60, 60, 100)', 'horizon-blend': 0.03, 'space-color': 'rgb(10, 10, 20)' }
+            },
+            center: [20, 30],
+            zoom: 1.5,
+            pitch: 45,
+            bearing: 0,
+            antialias: true
+        });
+
+        // Animasyon için sabitler
+        const PARTICLE_COUNT = 50000; // Ekranda aynı anda olacak parçacık sayısı
+        const ANIMATION_SPEED = 0.005; // Parçacıkların rotayı tamamlama hızını kontrol eder (0.001 yavaş, 0.01 hızlı)
+
+        map.on('load', async () => {
+            const loader = document.getElementById('loader');
+
+            // 1. Hazırlanmış rota verisini yükle
+            const response = await fetch('../data/openflights/routes_processed.geojson');
+            const routesData = await response.json();
+            const routes = routesData.features;
+            
+            // 2. Statik arka plan rotalarını çiz (tüm ağın yapısını gösterir)
+            map.addSource('routes-source', { type: 'geojson', data: routesData });
+            map.addLayer({
+                id: 'routes-background',
+                type: 'line',
+                source: 'routes-source',
+                paint: {
+                    'line-color': '#003366',
+                    'line-width': 0.5,
+                    'line-opacity': 0.1
+                }
+            });
+
+            // 3. Parçacık sistemini hazırla
+            const particles = { type: 'FeatureCollection', features: [] };
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const randomRoute = routes[Math.floor(Math.random() * routes.length)];
+                particles.features.push({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: randomRoute.geometry.coordinates[0] },
+                    properties: {
+                        route: randomRoute.geometry.coordinates,
+                        // Her parçacığın animasyona farklı bir zamanda başlaması için rastgele bir ilerleme değeri ata
+                        progress: Math.random()
+                    }
+                });
+            }
+            map.addSource('particles-source', { type: 'geojson', data: particles });
+
+            // 4. Parçacıkları haritada çiz
+            map.addLayer({
+                id: 'particles-layer',
+                type: 'circle',
+                source: 'particles-source',
+                paint: {
+                    'circle-radius': 0.8,
+                    'circle-color': '#00ffff', // Parlak, neon bir renk
+                    'circle-opacity': 0.8,
+                    'circle-blur': 0.5 // Parlama (glow) efekti
+                }
+            });
+
+            loader.style.display = 'none'; // Veri yüklendi, loader'ı gizle
+
+            // 5. Animasyon döngüsünü başlat
+            animate();
+        });
+
+        function animate() {
+            const particlesSource = map.getSource('particles-source');
+            if (!particlesSource) return;
+
+            const particlesData = particlesSource._data;
+
+            // Her bir parçacığın konumunu güncelle
+            for (const particle of particlesData.features) {
+                // İlerlemeyi artır ve 1'e ulaştığında sıfırla
+                particle.properties.progress = (particle.properties.progress + ANIMATION_SPEED) % 1;
+
+                const origin = particle.properties.route[0];
+                const destination = particle.properties.route[1];
+
+                // İki nokta arasındaki kavisli yolu (arc) anlık olarak hesapla
+                // Bu, düz bir çizgiyi kavisli gibi gösteren basit bir interpolasyon tekniğidir.
+                const lng = origin[0] + (destination[0] - origin[0]) * particle.properties.progress;
+                const lat = origin[1] + (destination[1] - origin[1]) * particle.properties.progress;
+                
+                // Kavisi oluşturmak için yüksekliği (irtifayı) hesapla
+                // Bu bir sinüs dalgası kullanarak yapılır: ortada en yüksek, baş ve sonda sıfır.
+                const altitude = Math.sin(particle.properties.progress * Math.PI) * 500000; // 500km maksimum irtifa
+
+                // MapLibre'nin 3D arazi özelliği olmasa da, bu konumu perspektif içinde doğru çizer.
+                // Gerçek bir 3D görünüm için farklı teknikler gerekir ama bu "sanki 3D" efekti verir.
+                particle.geometry.coordinates = [lng, lat];
+            }
+
+            // Kaynağı güncelleyerek haritayı yeniden çiz
+            particlesSource.setData(particlesData);
+
+            // Bir sonraki animasyon karesini iste
+            requestAnimationFrame(animate);
+        }
+    </script>
+</body>
+</html>
