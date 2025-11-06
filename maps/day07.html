@@ -115,17 +115,6 @@
             margin-right: 10px;
             border-radius: 2px;
         }
-        .legend-symbol {
-            width: 16px;
-            height: 16px;
-            margin-right: 10px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            flex-shrink: 0;
-        }
         .legend-label {
             color: #666;
         }
@@ -184,6 +173,12 @@
         <p style="font-size: 12px; color: #888; margin-top: 10px;">
             🖱️ Harita üzerinde gezinin - mouse konumuna göre duraklar arası örümcek ağı oluşur
         </p>
+        <p style="font-size: 11px; color: #999; margin-top: 8px; border-top: 1px solid #eee; padding-top: 8px;">
+            <strong>Veri Kaynağı:</strong><br>
+            <a href="https://ulasav.csb.gov.tr/dataset/34-iett-gtfs-verisi" target="_blank" style="color: #e74c3c; text-decoration: none;">
+                İETT GTFS Verisi - Ulaşım Veri Portalı
+            </a>
+        </p>
     </div>
 
     <div class="stats">
@@ -198,44 +193,27 @@
     </div>
 
     <div class="legend">
-        <h3>Bağlantı & Duraklar</h3>
+        <h3>Bağlantı Mesafesi</h3>
         
-        <div class="legend-section">
-            <div class="legend-section-title">Bağlantı Mesafesi</div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #27ae60; opacity: 0.9;"></div>
-                <span class="legend-label">0-500m</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #f39c12; opacity: 0.8;"></div>
-                <span class="legend-label">500m-1km</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #e67e22; opacity: 0.7;"></div>
-                <span class="legend-label">1-2km</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #e74c3c; opacity: 0.5;"></div>
-                <span class="legend-label">2-3km</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #c0392b; opacity: 0.3;"></div>
-                <span class="legend-label">3km+</span>
-            </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #27ae60; opacity: 0.9;"></div>
+            <span class="legend-label">0-500m</span>
         </div>
-
-        <div class="legend-section">
-            <div class="legend-section-title">Durak Türü</div>
-            <div class="legend-item">
-                <div class="legend-symbol" style="background: #3498db; border: 1px solid #2980b9;">
-                    <span style="color: white; font-size: 8px;">●</span>
-                </div>
-                <span class="legend-label">İETT Otobüs Durağı</span>
-            </div>
-            <div style="font-size: 11px; color: #999; margin-top: 5px; padding-left: 26px;">
-                14,840 durak<br>
-                (Metro/Marmaray hariç)
-            </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f39c12; opacity: 0.8;"></div>
+            <span class="legend-label">500m-1km</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e67e22; opacity: 0.7;"></div>
+            <span class="legend-label">1-2km</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e74c3c; opacity: 0.5;"></div>
+            <span class="legend-label">2-3km</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #c0392b; opacity: 0.3;"></div>
+            <span class="legend-label">3km+</span>
         </div>
     </div>
 
