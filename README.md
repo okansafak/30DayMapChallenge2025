@@ -28,10 +28,10 @@ Raster veri görselleştirmesi.
 ### Day 7: Network 🕷️
 **İETT Spider Map - İnteraktif Durak Ağı**
 
-İstanbul'daki 6,900+ İETT durağı arasındaki bağlantı ağını mouse konumuna göre dinamik olarak görselleştiren spider map.
+İstanbul'daki 14,840 İETT otobüs durağı arasındaki bağlantı ağını mouse konumuna göre dinamik olarak görselleştiren spider map.
 
-- 📁 Dosya: `maps/day06.html`
-- 🔧 Veri İşleme: `prepare_metro_from_gtfs.js`
+- 📁 Dosya: `maps/day07.html`
+- 🔧 Veri İşleme: `prepare_iett_stops.js`
 
 #### Özellikler
 - ✅ **10,902 gerçek sefer** verisi
@@ -74,7 +74,7 @@ node prepare_metro_from_gtfs.js
 - 🔧 Veri İşleme: `prepare_iett_stops.js`
 
 #### Özellikler
-- ✅ **6,900+ İETT durağı** gerçek konum verileri
+- ✅ **14,840 İETT otobüs durağı** (metro, marmaray ve diğer raylı sistem durakları hariç)
 - ✅ **Mouse konumuna göre dinamik spider web**: Harita üzerinde gezinirken en yakın duraklara çizgiler çizilir
 - ✅ **Mesafe bazlı renklendirme**: 
   - Yeşil (0-500m) → Turuncu (500m-1km) → Kırmızı (1-2km) → Koyu Kırmızı (3km+)
@@ -82,10 +82,11 @@ node prepare_metro_from_gtfs.js
   - Maksimum mesafe (500m - 5km)
   - Maksimum bağlantı sayısı (10-200 durak)
 - ✅ **Canlı istatistikler**: Aktif bağlantı ve en yakın durak mesafesi
-- ✅ **İnteraktif popup'lar**: Durak isimleri ve kodları
+- ✅ **İnteraktif popup'lar**: Durak ID ve kodları
+- ✅ **Carto Light basemap**: Durakların net görünmesi için açık renkli altlık harita
 
 #### Veri Kaynağı
-[İBB Açık Veri Portalı](https://data.ibb.gov.tr) - GTFS stops.csv
+[Ulaşım Veri Portalı - İETT GTFS](https://ulasav.csb.gov.tr/dataset/34-iett-gtfs-verisi) - stops_iett.csv
 
 #### Teknik Detaylar
 - **MapLibre GL JS** v3.6.2
