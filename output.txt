@@ -1,0 +1,292 @@
+Excel dosyası okunuyor...
+Toplam 92 satır bulundu
+
+İlk 10 satır:
+Satır 0: [
+  'İllere ve cinsiyete göre yabancı nüfus, 2022, 2023',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  ''
+]
+Satır 1: [
+  'Foreign population by provinces and sex, 2022, 2023',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  ''
+]
+Satır 2: [
+  '', 2022, '', '',
+  '', 2023, '', '',
+  '', ''
+]
+Satır 3: [
+  'İl\nProvinces',
+  'Toplam\nTotal',
+  'Erkek\nMale',
+  'Kadın\nFemale',
+  '',
+  'Toplam\nTotal',
+  'Erkek\nMale',
+  'Kadın\nFemale',
+  '',
+  ''
+]
+Satır 4: [
+  'Toplam-Total',
+  1823836,
+  902124,
+  921712,
+  '',
+  1570543,
+  762672,
+  807871,
+  '',
+  ''
+]
+Satır 5: [
+  'Adana', 15320,
+  7710,    7610,
+  '',      12696,
+  6196,    6500,
+  '',      ''
+]
+Satır 6: [ 'Adıyaman', 1852, 891, 961, '', 1603, 759, 844, '', '' ]
+Satır 7: [ 'Afyonkarahisar', 12255, 6397, 5858, '', 11270, 5810, 5460, '', '' ]
+Satır 8: [
+  'Ağrı', 1211, 745,
+  466,    '',   1214,
+  750,    464,  '',
+  ''
+]
+Satır 9: [
+  'Amasya', 3929,
+  1910,     2019,
+  '',       3508,
+  1712,     1796,
+  '',       ''
+]
+
+Veri başlangıç satırı: 4
+Başlangıç satırı: [
+  'Toplam-Total',
+  1823836,
+  902124,
+  921712,
+  '',
+  1570543,
+  762672,
+  807871,
+  '',
+  ''
+]
+
+
+=== Excel Veri İşleme ===
+Adana -> Adana: Toplam=12696, E=6196, K=6500
+Adıyaman -> Adiyaman: Toplam=1603, E=759, K=844
+Afyonkarahisar -> Afyon: Toplam=11270, E=5810, K=5460
+Ağrı -> Agri: Toplam=1214, E=750, K=464
+Amasya -> Amasya: Toplam=3508, E=1712, K=1796
+Ankara -> Ankara: Toplam=142287, E=67063, K=75224
+Antalya -> Antalya: Toplam=132157, E=54910, K=77247
+Artvin -> Artvin: Toplam=518, E=147, K=371
+Aydın -> Aydin: Toplam=14848, E=6446, K=8402
+Balıkesir -> Balikesir: Toplam=12232, E=6230, K=6002
+Bilecik -> Bilecik: Toplam=3553, E=2082, K=1471
+Bingöl -> Bingöl: Toplam=614, E=353, K=261
+Bitlis -> Bitlis: Toplam=361, E=210, K=151
+Bolu -> Bolu: Toplam=9694, E=5350, K=4344
+Burdur -> Burdur: Toplam=4211, E=2149, K=2062
+Bursa -> Bursa: Toplam=59284, E=29288, K=29996
+Çanakkale -> Çanakkale: Toplam=5261, E=2151, K=3110
+Çankırı -> Çankiri: Toplam=5181, E=2930, K=2251
+Çorum -> Çorum: Toplam=6676, E=3207, K=3469
+Denizli -> Denizli: Toplam=14135, E=6896, K=7239
+Diyarbakır -> Diyarbakir: Toplam=1693, E=764, K=929
+Edirne -> Edirne: Toplam=7675, E=3727, K=3948
+Elazığ -> Elazığ: Toplam=4041, E=2085, K=1956
+Erzincan -> Erzincan: Toplam=4009, E=2383, K=1626
+Erzurum -> Erzurum: Toplam=4586, E=2494, K=2092
+Eskişehir -> Eskisehir: Toplam=25001, E=12960, K=12041
+Gaziantep -> Gaziantep: Toplam=14082, E=7541, K=6541
+Giresun -> Giresun: Toplam=5726, E=3226, K=2500
+Gümüşhane -> Gümüshane: Toplam=2717, E=1695, K=1022
+Hakkari -> Hakkari: Toplam=743, E=290, K=453
+Hatay -> Hatay: Toplam=4968, E=2423, K=2545
+Isparta -> Isparta: Toplam=8738, E=4317, K=4421
+Mersin -> Mersin: Toplam=49845, E=28101, K=21744
+İstanbul -> Istanbul: Toplam=599118, E=285203, K=313915
+İzmir -> Izmir: Toplam=37776, E=16057, K=21719
+Kars -> Kars: Toplam=1339, E=759, K=580
+Kastamonu -> Kastamonu: Toplam=3931, E=2103, K=1828
+Kayseri -> Kayseri: Toplam=18221, E=9243, K=8978
+Kırklareli -> Kirklareli: Toplam=3834, E=1861, K=1973
+Kırşehir -> Kirsehir: Toplam=11529, E=6022, K=5507
+Kocaeli -> Kocaeli: Toplam=18384, E=9267, K=9117
+Konya -> Konya: Toplam=28025, E=14757, K=13268
+Kütahya -> Kütahya: Toplam=11816, E=6355, K=5461
+Malatya -> Malatya: Toplam=4482, E=2435, K=2047
+Manisa -> Manisa: Toplam=8251, E=3982, K=4269
+Kahramanmaraş -> K.Maras: Toplam=3753, E=1960, K=1793
+Mardin -> Mardin: Toplam=3218, E=1502, K=1716
+Muğla -> Mugla: Toplam=25086, E=10671, K=14415
+Muş -> Mus: Toplam=490, E=247, K=243
+Nevşehir -> Nevsehir: Toplam=8528, E=4675, K=3853
+Niğde -> Nigde: Toplam=3960, E=2200, K=1760
+Ordu -> Ordu: Toplam=6108, E=2792, K=3316
+Rize -> Rize: Toplam=1539, E=695, K=844
+Sakarya -> Sakarya: Toplam=25749, E=13274, K=12475
+Samsun -> Samsun: Toplam=20599, E=10141, K=10458
+Siirt -> Siirt: Toplam=575, E=331, K=244
+Sinop -> Sinop: Toplam=2114, E=1070, K=1044
+Sivas -> Sivas: Toplam=7118, E=3936, K=3182
+Tekirdağ -> Tekirdag: Toplam=8438, E=3923, K=4515
+Tokat -> Tokat: Toplam=7162, E=4136, K=3026
+Trabzon -> Trabzon: Toplam=13815, E=7126, K=6689
+Tunceli -> Tunceli: Toplam=446, E=270, K=176
+Şanlıurfa -> Sanliurfa: Toplam=6038, E=3279, K=2759
+Uşak -> Usak: Toplam=8038, E=4245, K=3793
+Van -> Van: Toplam=3615, E=1700, K=1915
+Yozgat -> Yozgat: Toplam=9824, E=5431, K=4393
+Zonguldak -> Zinguldak: Toplam=4789, E=2625, K=2164
+Aksaray -> Aksaray: Toplam=16253, E=8885, K=7368
+Bayburt -> Bayburt: Toplam=642, E=390, K=252
+Karaman -> Karaman: Toplam=2644, E=1434, K=1210
+Kırıkkale -> Kinkkale: Toplam=6975, E=3615, K=3360
+Batman -> Batman: Toplam=1054, E=542, K=512
+Şırnak -> Sirnak: Toplam=994, E=376, K=618
+Bartın -> Bartın: Toplam=2496, E=1531, K=965
+Ardahan -> Ardahan: Toplam=389, E=258, K=131
+Iğdır -> Iğdır: Toplam=969, E=419, K=550
+Yalova -> Yalova: Toplam=24811, E=12264, K=12547
+Karabük -> Karabük: Toplam=11746, E=7566, K=4180
+Kilis -> Kilis: Toplam=1170, E=678, K=492
+Osmaniye -> Osmaniye: Toplam=816, E=337, K=479
+Düzce -> Düzce: Toplam=6749, E=3459, K=3290
+TÜİK, Adrese Dayalı Nüfus Kayıt Sistemi Sonuçları, 2023 -> TÜİK, Adrese Dayalı Nüfus Kayıt Sistemi Sonuçları, 2023: Toplam=0, E=0, K=0
+TurkStat, The Results of Address Based Population Registration System, 2023 -> TurkStat, The Results of Address Based Population Registration System, 2023: Toplam=0, E=0, K=0
+Yabancı uyruklu nüfus kapsamında; referans tarihinde geçerli ikamet veya çalışma iznine sahip kişiler, uluslararası koruma kimlik belgesi gibi ikamet izni yerine geçen kimlik belgesi olan ve referans tarihinde geçerli adres beyanı olan kişiler ve izinle Türkiye Cumhuriyeti vatandaşlığından çıkmış referans tarihinde geçerli adres beyanı olan mavi kart hamili kişiler değerlendirilmiştir. Kurs, turizm, bilimsel araştırma vb. nedenlerle 90 günden kısa süreli vize veya ikamet iznine sahip yabancılar ile geçici koruma statüsüyle ülkede bulunan Suriyeliler nüfusa dâhil değildir. -> Yabancı uyruklu nüfus kapsamında; referans tarihinde geçerli ikamet veya çalışma iznine sahip kişiler, uluslararası koruma kimlik belgesi gibi ikamet izni yerine geçen kimlik belgesi olan ve referans tarihinde geçerli adres beyanı olan kişiler ve izinle Türkiye Cumhuriyeti vatandaşlığından çıkmış referans tarihinde geçerli adres beyanı olan mavi kart hamili kişiler değerlendirilmiştir. Kurs, turizm, bilimsel araştırma vb. nedenlerle 90 günden kısa süreli vize veya ikamet iznine sahip yabancılar ile geçici koruma statüsüyle ülkede bulunan Suriyeliler nüfusa dâhil değildir.: Toplam=0, E=0, K=0
+Foreign population covers individuals who are holding a valid residence/work permit at the reference day and individuals who have a valid address declaration at the reference day while holding an identity document equivalent to residence permit such as international protection identity document and the individuals who have already renounced his/her Turkish Republic citizenship and who have a valid address declaration at the reference day. In addition to Syrians under temporary protection, foreigners holding visas or residence permits shorter than 90 days with the purpose of training, tourism, scientific research, etc. are not covered. -> Foreign population covers individuals who are holding a valid residence/work permit at the reference day and individuals who have a valid address declaration at the reference day while holding an identity document equivalent to residence permit such as international protection identity document and the individuals who have already renounced his/her Turkish Republic citizenship and who have a valid address declaration at the reference day. In addition to Syrians under temporary protection, foreigners holding visas or residence permits shorter than 90 days with the purpose of training, tourism, scientific research, etc. are not covered.: Toplam=0, E=0, K=0
+
+85 il verisi işlendi
+
+
+=== GeoJSON İşleme ===
+GeoJSON'da 81 il var
+✓ Adana: 12696 yabancı
+✓ Adiyaman: 1603 yabancı
+✓ Afyon: 11270 yabancı
+✓ Agri: 1214 yabancı
+✓ Aksaray: 16253 yabancı
+✓ Amasya: 3508 yabancı
+✓ Ankara: 142287 yabancı
+✓ Antalya: 132157 yabancı
+✓ Ardahan: 389 yabancı
+✓ Artvin: 518 yabancı
+✓ Aydin: 14848 yabancı
+✓ Balikesir: 12232 yabancı
+✓ Bartın: 2496 yabancı
+✓ Batman: 1054 yabancı
+✓ Bayburt: 642 yabancı
+✓ Bilecik: 3553 yabancı
+✓ Bingöl: 614 yabancı
+✓ Bitlis: 361 yabancı
+✓ Bolu: 9694 yabancı
+✓ Burdur: 4211 yabancı
+✓ Bursa: 59284 yabancı
+✓ Çanakkale: 5261 yabancı
+✓ Çankiri: 5181 yabancı
+✓ Çorum: 6676 yabancı
+✓ Denizli: 14135 yabancı
+✓ Diyarbakir: 1693 yabancı
+✓ Düzce: 6749 yabancı
+✓ Edirne: 7675 yabancı
+✓ Elazığ: 4041 yabancı
+✓ Erzincan: 4009 yabancı
+✓ Erzurum: 4586 yabancı
+✓ Eskisehir: 25001 yabancı
+✓ Gaziantep: 14082 yabancı
+✓ Giresun: 5726 yabancı
+✓ Gümüshane: 2717 yabancı
+✓ Hakkari: 743 yabancı
+✓ Hatay: 4968 yabancı
+✓ Iğdır: 969 yabancı
+✓ Isparta: 8738 yabancı
+✓ Istanbul: 599118 yabancı
+✓ Izmir: 37776 yabancı
+✓ K.Maras: 3753 yabancı
+✓ Karabük: 11746 yabancı
+✓ Karaman: 2644 yabancı
+✓ Kars: 1339 yabancı
+✓ Kastamonu: 3931 yabancı
+✓ Kayseri: 18221 yabancı
+✓ Kilis: 1170 yabancı
+✓ Kinkkale: 6975 yabancı
+✓ Kirklareli: 3834 yabancı
+✓ Kirsehir: 11529 yabancı
+✓ Kocaeli: 18384 yabancı
+✓ Konya: 28025 yabancı
+✓ Kütahya: 11816 yabancı
+✓ Malatya: 4482 yabancı
+✓ Manisa: 8251 yabancı
+✓ Mardin: 3218 yabancı
+✓ Mersin: 49845 yabancı
+✓ Mugla: 25086 yabancı
+✓ Mus: 490 yabancı
+✓ Nevsehir: 8528 yabancı
+✓ Nigde: 3960 yabancı
+✓ Ordu: 6108 yabancı
+✓ Osmaniye: 816 yabancı
+✓ Rize: 1539 yabancı
+✓ Sakarya: 25749 yabancı
+✓ Samsun: 20599 yabancı
+✓ Sanliurfa: 6038 yabancı
+✓ Siirt: 575 yabancı
+✓ Sinop: 2114 yabancı
+✓ Sirnak: 994 yabancı
+✓ Sivas: 7118 yabancı
+✓ Tekirdag: 8438 yabancı
+✓ Tokat: 7162 yabancı
+✓ Trabzon: 13815 yabancı
+✓ Tunceli: 446 yabancı
+✓ Usak: 8038 yabancı
+✓ Van: 3615 yabancı
+✓ Yalova: 24811 yabancı
+✓ Yozgat: 9824 yabancı
+✓ Zinguldak: 4789 yabancı
+
+
+=== Sonuç ===
+✓ Eşleşen il sayısı: 81
+✗ Eşleşmeyen il sayısı: 0
+
+✓ GeoJSON dosyası kaydedildi: ./data/population/turkey_foreign_population_2023.geojson
+Toplam 81 il
+
+Toplam yabancı nüfus: 1.570.543
+Erkek: 762.672 (48.6%)
+Kadın: 807.871 (51.4%)
+
+En fazla yabancı nüfusu olan 10 il:
+1. İstanbul: 599.118 (E: 285.203, K: 313.915)
+2. Ankara: 142.287 (E: 67.063, K: 75.224)
+3. Antalya: 132.157 (E: 54.910, K: 77.247)
+4. Bursa: 59.284 (E: 29.288, K: 29.996)
+5. Mersin: 49.845 (E: 28.101, K: 21.744)
+6. İzmir: 37.776 (E: 16.057, K: 21.719)
+7. Konya: 28.025 (E: 14.757, K: 13.268)
+8. Sakarya: 25.749 (E: 13.274, K: 12.475)
+9. Muğla: 25.086 (E: 10.671, K: 14.415)
+10. Eskişehir: 25.001 (E: 12.960, K: 12.041)
