@@ -21,17 +21,12 @@ Raster veri görselleştirmesi.
 - 📁 Dosya: `maps/day05.html`
 
 ### Day 6: Dimensions ⭐
-**İstanbul Rail Sistemi - 24 Saatlik Animasyon**
+**İstanbul Raylı Sistem - 24 Saatlik Spacetime Animasyonu**
 
-İstanbul'un metro, tramvay ve banliyö tren sistemlerinin günlük hareketlerini gösteren interaktif animasyon haritası.
+İstanbul'un metro, tramvay ve banliyö tren sistemlerinin günlük hareketlerini gösteren interaktif 3D+zaman animasyon haritası.
 
-### Day 7: Network 🕷️
-**İETT Spider Map - İnteraktif Durak Ağı**
-
-İstanbul'daki 14,840 İETT otobüs durağı arasındaki bağlantı ağını mouse konumuna göre dinamik olarak görselleştiren spider map.
-
-- 📁 Dosya: `maps/day07.html`
-- 🔧 Veri İşleme: `prepare_iett_stops.js`
+- 📁 Dosya: `maps/day06.html`
+- 🔧 Veri İşleme: `prepare_metro_from_gtfs.js`
 
 #### Özellikler
 - ✅ **10,902 gerçek sefer** verisi
@@ -68,7 +63,8 @@ node prepare_metro_from_gtfs.js
 
 ---
 
-### Day 7 - Detaylı Bilgi
+### Day 7: Network 🕷️
+**İETT Spider Map - İnteraktif Durak Ağı**
 
 - 📁 Dosya: `maps/day07.html`
 - 🔧 Veri İşleme: `prepare_iett_stops.js`
@@ -106,6 +102,83 @@ node prepare_iett_stops.js
 
 **Not:** `iett_stops.geojson` dosyası GitHub'da bulunmamaktadır. Lokal olarak `prepare_iett_stops.js` scripti çalıştırılarak oluşturulmalıdır.
 
+---
+
+### Day 8: Urban 🏙️
+**Kocaeli Acil Toplanma Alanları - Voronoi Analizi**
+
+İstanbul'un komşu ili Kocaeli'deki 338 acil toplanma alanının hizmet alanlarını Voronoi diyagramı ile görselleştiren interaktif harita.
+
+- 📁 Dosya: `maps/day08.html`
+- 📊 Veri: `data/toplanma alani kocaeli/acil-toplanma-alanlar.json`
+
+#### Özellikler
+- ✅ **338 acil toplanma alanı** koordinat ve detay bilgileri
+- ✅ **Voronoi diyagramı**: Her bölge en yakın toplanma alanını gösterir
+- ✅ **Alan büyüklüğü analizi**: Her Voronoi hücresinin km² cinsinden alanı
+- ✅ **Renk kodlaması**:
+  - 🟢 Yeşil (0-2 km²): Kolay erişim, yoğun servis
+  - 🟡 Sarı (2-10 km²): Orta seviye erişim
+  - 🔴 Kırmızı (10+ km²): Geniş alan, ek toplanma noktası gerekebilir
+- ✅ **İnteraktif popup'lar**: Toplanma alanı adı, adresi, telefon ve servis alanı bilgisi
+
+#### Veri Kaynağı
+[Ulaşım Veri Portalı - Kocaeli Acil Toplanma Alanları](https://ulasav.csb.gov.tr/dataset/41-acil-toplanma-alanlari)
+
+#### Teknik Detaylar
+- **MapLibre GL JS** v3.6.2
+- **Turf.js** v6: Voronoi diyagramı ve alan hesaplama
+- **turf.voronoi()**: Delaunay triangulation tabanlı Voronoi oluşturma
+- **turf.area()**: m² cinsinden alan hesaplama ve km²'ye dönüştürme
+- **Interpolated Color Gradient**: Alan büyüklüğüne göre 6 kademeli renklendirme
+
+#### Kentsel Planlama Çıkarımları
+- Kırmızı bölgeler: Ek toplanma alanı ihtiyacı olabilir
+- Yeşil bölgeler: Yeterli yoğunlukta servis alanı
+- Voronoi hücre boyutu: Afet anında erişim mesafesinin göstergesi
+
+---
+
+### Day 10: Air 🌬️
+**İstanbul Hava Kalitesi Monitörü - Gerçek Zamanlı Kirlilik Haritası**
+
+Gerçek zamanlı hava kalitesi verilerini görselleştiren, interaktif hava durumu ve kirlilik monitörü.
+
+- 📁 Dosya: `maps/day10.html`
+
+#### Özellikler
+- ✅ **Gerçek zamanlı veri**: Open-Meteo API'den anlık hava durumu ve hava kalitesi
+- ✅ **Hava kalitesi parametreleri**:
+  - PM2.5: 2.5 mikrondan küçük partiküller
+  - PM10: 10 mikrondan küçük partiküller
+  - NO₂: Nitrojen dioksit
+  - O₃: Ozon
+- ✅ **AQI hesaplama**: Air Quality Index (Hava Kalitesi İndeksi)
+- ✅ **İnteraktif harita**: Haritaya tıklayarak herhangi bir noktanın hava kalitesini öğrenin
+- ✅ **Dinamik görselleştirme**:
+  - Renkli circle layer: AQI değerine göre yeşil/sarı/kırmızı/mor
+  - Dinamik yarıçap: Kötü hava daha geniş alanı temsil eder
+- ✅ **24 saatlik PM2.5 grafiği**: Eksenleri, değerleri ve zaman etiketleriyle detaylı trend
+- ✅ **Konum desteği**: Gelişmiş hata yönetimi ile GPS tabanlı konum bulma
+- ✅ **Hava durumu verileri**: Sıcaklık, nem, rüzgar hızı ve yönü
+
+#### Veri Kaynağı
+- [Open-Meteo Weather API](https://open-meteo.com/en/docs)
+- [Open-Meteo Air Quality API](https://open-meteo.com/en/docs/air-quality-api)
+
+#### Teknik Detaylar
+- **Leaflet.js** v1.9.4: Basit ve güçlü harita kütüphanesi
+- **CartoDB Dark Matter**: Dark tema altlık harita
+- **Canvas API**: Özel grafik çizimi (y ekseni, değerler, zaman etiketleri)
+- **Geolocation API**: GPS tabanlı konum bulma
+- **Responsive Design**: Mobil ve masaüstü uyumlu grid layout
+
+#### AQI Renk Skalası
+- 🟢 **İyi (0-50)**: Hava kalitesi tatmin edici
+- 🟡 **Orta (51-100)**: Hassas gruplar için kabul edilebilir
+- 🔴 **Kötü (101-150)**: Hassas gruplar etkilenir
+- 🟣 **Çok Kötü (150+)**: Herkes için sağlıksız
+
 ## 📊 Veri Setleri
 
 ```
@@ -121,16 +194,26 @@ data/
 │   ├── stop_times.csv
 │   ├── stops.csv
 │   └── trips.csv
+├── toplanma alani kocaeli/   # Kocaeli acil toplanma alanları
+│   └── acil-toplanma-alanlar.json
+├── population/               # Türkiye nüfus verileri
+│   ├── gadm41_TUR_1.json
+│   ├── illere ve cinsiyete gore yabanci nufus.xls
+│   └── turkey_foreign_population_2023.geojson
 └── openflights/
     └── routes_processed.geojson
 ```
 
 ## 🛠️ Teknolojiler
 
-- **MapLibre GL JS** - İnteraktif harita görselleştirme
+- **MapLibre GL JS** v3.6.2 - İnteraktif WebGL tabanlı harita görselleştirme
+- **Leaflet.js** v1.9.4 - Hafif ve esnek harita kütüphanesi
+- **Turf.js** v6 - İstemci tarafı coğrafi analiz (Voronoi, alan hesaplama)
 - **Node.js** - Veri işleme ve dönüşüm
-- **GTFS** - Toplu taşıma veri standardı
+- **GTFS** - Toplu taşıma veri standardı (General Transit Feed Specification)
 - **GeoJSON** - Coğrafi veri formatı
+- **Canvas API** - Özel grafik ve görselleştirmeler
+- **Geolocation API** - Tarayıcı tabanlı konum servisleri
 
 ## 📝 Lisans
 
@@ -138,9 +221,19 @@ Bu proje #30DayMapChallenge kapsamında eğitim amaçlı hazırlanmıştır.
 
 ## 🔗 Bağlantılar
 
+**Etkinlik & Topluluk**
 - [30 Day Map Challenge](https://30daymapchallenge.com/)
+- [#opengisturkiye](https://twitter.com/hashtag/opengisturkiye)
+
+**Veri Kaynakları**
 - [İBB Açık Veri Portalı](https://data.ibb.gov.tr)
+- [Ulaşım Veri Portalı](https://ulasav.csb.gov.tr)
+- [Open-Meteo API](https://open-meteo.com)
+
+**Teknoloji & Dokümantasyon**
 - [MapLibre GL JS](https://maplibre.org/)
+- [Leaflet.js](https://leafletjs.com/)
+- [Turf.js](https://turfjs.org/)
 - [GTFS Specification](https://gtfs.org/)
 
 ---

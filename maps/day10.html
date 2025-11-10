@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gün 10: Air - İstanbul Hava Kalitesi</title>
+
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+<style>
+:root{
+  --bg:#0f1724;
+  --accent:#38bdf8;
+  --glass:rgba(255,255,255,0.04);
+  --muted:#94a3b8;
+  --good:#4ade80;--mod:#facc15;--bad:#f87171;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b1120;color:#e2e8f0;height:100vh;display:grid;grid-template-columns:1fr 380px;gap:14px;padding:14px;overflow:hidden;}
+@media(max-width:900px){body{grid-template-columns:1fr;grid-template-rows:55vh auto;padding:10px;gap:10px;}}
+#map{border-radius:16px;overflow:hidden;position:relative;box-shadow:0 4px 15px rgba(0,0,0,0.4);background:#1a2332;}
+.sidebar{background:rgba(10,14,39,0.95);backdrop-filter:blur(10px);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;border:1px solid rgba(255,255,255,0.1);overflow-y:auto;}
+.day{display:inline-block;background:var(--accent);color:#082f49;padding:4px 12px;border-radius:4px;font-size:11px;font-weight:700;margin-bottom:10px;letter-spacing:0.5px;}
+h1{margin:0;font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px;color:#4fc3f7;}
+.lead{color:var(--muted);font-size:13px;margin:0;line-height:1.5;}
+.location-box{background:rgba(56,189,248,0.1);border-radius:10px;padding:12px;border:1px solid rgba(56,189,248,0.2);}
+.location-box strong{font-size:16px;display:block;margin-bottom:4px;}
+.location-box small{color:var(--muted);font-size:12px;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;}
+.stat{background:var(--glass);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.05);text-align:center;}
+.stat h3{margin:0;font-size:18px;font-weight:700;color:var(--accent);}
+.stat p{margin:4px 0 0;font-size:12px;color:var(--muted);}
+.aqi{padding:14px;border-radius:12px;font-weight:600;text-align:center;font-size:16px;transition:all 0.3s;}
+.good{background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;}
+.moderate{background:linear-gradient(135deg,#f59e0b,#eab308);color:#0f1724;}
+.bad{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;}
+.very-bad{background:linear-gradient(135deg,#9333ea,#a855f7);color:#fff;}
+button{border:1px solid var(--accent);background:rgba(79,195,247,0.2);color:var(--accent);border-radius:8px;padding:10px 16px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.3s;}
+button:hover:not(:disabled){background:rgba(79,195,247,0.3);transform:translateY(-1px);}
+button:active:not(:disabled){transform:translateY(0);}
+button:disabled{opacity:0.5;cursor:not-allowed;}
+button.primary{background:var(--accent);color:#0a0e27;font-weight:600;border:none;}
+button.primary:hover:not(:disabled){box-shadow:0 4px 12px rgba(56,189,248,0.4);}
+small{color:var(--muted);}
+.chart{width:100%;height:100px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid rgba(255,255,255,0.05);}
+.coords{margin-top:auto;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05);}
+.button-group{display:flex;gap:8px;}
+.loading{text-align:center;color:var(--accent);padding:8px;font-size:13px;}
+.back-button{position:fixed;bottom:20px;left:20px;background:rgba(10,14,39,0.95);color:#4fc3f7;text-decoration:none;padding:10px 20px;border-radius:12px;font-weight:600;z-index:1000;border:1px solid rgba(79,195,247,0.3);backdrop-filter:blur(10px);transition:all 0.3s;}
+.back-button:hover{background:rgba(79,195,247,0.2);transform:translateY(-2px);box-shadow:0 4px 12px rgba(79,195,247,0.3);}
+.pollutant-detail{background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;font-size:12px;}
+.pollutant-detail div{display:flex;justify-content:space-between;margin:4px 0;}
+.pollutant-detail span:first-child{color:var(--muted);}
+.pollutant-detail span:last-child{font-weight:600;}
+.air-quality-marker{background:transparent;border:none;}
+.leaflet-popup-content-wrapper{background:rgba(10,14,39,0.95);color:#e2e8f0;border-radius:8px;backdrop-filter:blur(10px);}
+.leaflet-popup-tip{background:rgba(10,14,39,0.95);}
+</style>
+</head>
+<body>
+<a href="../index.html" class="back-button">❮ Ana Sayfa</a>
+<div id="map"></div>
+
+<aside class="sidebar">
+  <div class="day">GÜN 10</div>
+  <h1>🌬️ Hava Kalitesi Monitörü</h1>
+  <p class="lead">Gerçek zamanlı hava kalitesi, rüzgar ve hava durumu verileri. Haritaya tıklayarak farklı lokasyonları keşfedin.</p>
+
+  <div class="location-box">
+    <strong id="place">İstanbul</strong>
+    <small id="time">Veri yükleniyor...</small>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><h3 id="temp">--</h3><p>Sıcaklık</p></div>
+    <div class="stat"><h3 id="wind">--</h3><p>Rüzgar</p></div>
+    <div class="stat"><h3 id="humidity">--</h3><p>Nem</p></div>
+  </div>
+
+  <div id="aqi" class="aqi">AQI hesaplanıyor...</div>
+  
+  <div class="pollutant-detail" id="pollutants">
+    <div><span>PM2.5:</span><span id="pm25">--</span></div>
+    <div><span>PM10:</span><span id="pm10">--</span></div>
+    <div><span>NO₂:</span><span id="no2">--</span></div>
+    <div><span>O₃:</span><span id="o3">--</span></div>
+  </div>
+
+  <canvas id="chart" class="chart"></canvas>
+
+  <div class="button-group">
+    <button id="locate">📍 Konumum</button>
+    <button class="primary" id="refresh">🔄 Yenile</button>
+  </div>
+
+  <div class="coords">
+    <div id="latlon">41.0082, 28.9784</div>
+    <div id="lastupdate">Güncelleniyor...</div>
+  </div>
+</aside>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const center={lat:41.0082,lon:28.9784};
+let map, currentMarker, airQualityCircle;
+
+function initMap(){
+ map = L.map('map', {
+   zoomControl: false
+ }).setView([center.lat, center.lon], 9);
+ 
+ // Dark tema CartoDB Dark Matter
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+   attribution: '© OpenStreetMap contributors © CARTO',
+   maxZoom: 19,
+   subdomains: 'abcd'
+ }).addTo(map);
+ 
+ L.control.zoom({position: 'topright'}).addTo(map);
+ 
+ map.on('click', e => {
+   fetchData(e.latlng.lat, e.latlng.lng, "Seçilen Konum");
+ });
+ 
+ // İlk veri yükleme
+ setTimeout(() => {
+   fetchData(center.lat, center.lon, "İstanbul");
+ }, 500);
+}
+
+async function fetchData(lat, lon, place){
+ document.getElementById('latlon').innerText = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+ 
+ const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m&timezone=auto`;
+ const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm2_5,pm10,nitrogen_dioxide,ozone&hourly=pm2_5&timezone=auto`;
+ 
+ try{
+  const [weatherRes, airRes] = await Promise.all([fetch(weatherUrl), fetch(airUrl)]);
+  const weatherData = await weatherRes.json();
+  const airData = await airRes.json();
+  
+  // Hava durumu verileri
+  const temp = weatherData.current.temperature_2m;
+  const humidity = weatherData.current.relative_humidity_2m;
+  const windSpeed = weatherData.current.wind_speed_10m;
+  const windDir = weatherData.current.wind_direction_10m;
+  
+  document.getElementById('place').innerText = place;
+  document.getElementById('time').innerText = new Date().toLocaleString('tr-TR');
+  document.getElementById('temp').innerText = `${temp.toFixed(1)}°C`;
+  document.getElementById('wind').innerText = `${windSpeed.toFixed(1)} m/s`;
+  document.getElementById('humidity').innerText = `${humidity}%`;
+  document.getElementById('lastupdate').innerText = new Date().toLocaleTimeString('tr-TR');
+  
+  // Hava kalitesi verileri
+  const pm25 = airData.current.pm2_5 || 0;
+  const pm10 = airData.current.pm10 || 0;
+  const no2 = airData.current.nitrogen_dioxide || 0;
+  const o3 = airData.current.ozone || 0;
+  
+  document.getElementById('pm25').innerText = `${pm25.toFixed(1)} µg/m³`;
+  document.getElementById('pm10').innerText = `${pm10.toFixed(1)} µg/m³`;
+  document.getElementById('no2').innerText = `${no2.toFixed(1)} µg/m³`;
+  document.getElementById('o3').innerText = `${o3.toFixed(1)} µg/m³`;
+  
+  // AQI hesaplama (basitleştirilmiş)
+  const aqiVal = Math.max(pm25 * 2, pm10);
+  const aqiBox = document.getElementById('aqi');
+  
+  let level = 'İyi';
+  let className = 'good';
+  if(aqiVal > 50) { level = 'Orta'; className = 'moderate'; }
+  if(aqiVal > 100) { level = 'Kötü'; className = 'bad'; }
+  if(aqiVal > 150) { level = 'Çok Kötü'; className = 'very-bad'; }
+  
+  aqiBox.className = `aqi ${className}`;
+  aqiBox.innerText = `AQI: ${aqiVal.toFixed(0)} • ${level}`;
+  
+  // Grafik çizimi
+  if(airData.hourly && airData.hourly.pm2_5) {
+    drawChart(airData.hourly.pm2_5.slice(0, 24));
+  }
+  
+  // Haritada görselleştirme
+  updateMapVisualization(lat, lon, aqiVal, level, className);
+  
+  // Haritayı merkeze al
+  map.setView([lat, lon], map.getZoom(), {animate: true, duration: 0.8});
+  
+ } catch(e) {
+   console.error('Veri yükleme hatası:', e);
+   document.getElementById('aqi').innerText = 'Veri yüklenemedi';
+ }
+}
+
+function updateMapVisualization(lat, lon, aqiVal, level, className){
+  // Önceki marker ve circle'ı kaldır
+  if(currentMarker) map.removeLayer(currentMarker);
+  if(airQualityCircle) map.removeLayer(airQualityCircle);
+  
+  // Hava kalitesine göre renk belirleme
+  let color, fillColor;
+  if(className === 'good') {
+    color = '#16a34a';
+    fillColor = '#22c55e';
+  } else if(className === 'moderate') {
+    color = '#f59e0b';
+    fillColor = '#fbbf24';
+  } else if(className === 'bad') {
+    color = '#ef4444';
+    fillColor = '#f87171';
+  } else {
+    color = '#9333ea';
+    fillColor = '#a855f7';
+  }
+  
+  // AQI değerine göre yarıçap (0-200 arası normalize, 5-25km arası)
+  const radius = 5000 + (Math.min(aqiVal, 200) / 200) * 20000;
+  
+  // Hava kalitesi bölgesi (gradient circle)
+  airQualityCircle = L.circle([lat, lon], {
+    color: color,
+    fillColor: fillColor,
+    fillOpacity: 0.15,
+    opacity: 0.4,
+    weight: 2,
+    radius: radius
+  }).addTo(map);
+  
+  // Merkez marker
+  const iconHtml = `
+    <div style="
+      background: ${color};
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      font-size: 20px;
+    ">🌬️</div>
+  `;
+  
+  const customIcon = L.divIcon({
+    html: iconHtml,
+    className: 'air-quality-marker',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+  });
+  
+  currentMarker = L.marker([lat, lon], {icon: customIcon})
+    .bindPopup(`
+      <div style="text-align: center; font-family: -apple-system, sans-serif;">
+        <h3 style="margin: 0 0 8px 0; color: ${color};">AQI: ${aqiVal.toFixed(0)}</h3>
+        <p style="margin: 0; font-size: 14px; font-weight: 600;">${level}</p>
+      </div>
+    `)
+    .addTo(map);
+}
+
+function drawChart(vals){
+ const c = document.getElementById('chart');
+ const ctx2 = c.getContext('2d');
+ c.width = c.clientWidth * devicePixelRatio;
+ c.height = c.clientHeight * devicePixelRatio;
+ ctx2.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+ ctx2.clearRect(0, 0, c.width, c.height);
+ 
+ const max = Math.max(...vals, 50);
+ const min = Math.min(...vals, 0);
+ const w = c.width / devicePixelRatio;
+ const h = c.height / devicePixelRatio;
+ const padding = 40; // Y ekseni için alan
+ const chartW = w - padding;
+ const chartH = h - 20; // Alt için boşluk
+ 
+ // Y ekseni ve değerler
+ ctx2.fillStyle = 'rgba(148,163,184,0.6)';
+ ctx2.font = '10px -apple-system, sans-serif';
+ ctx2.textAlign = 'right';
+ 
+ // Max, orta ve min değerleri göster
+ ctx2.fillText(`${max.toFixed(0)} µg/m³`, padding - 5, 15);
+ ctx2.fillText(`${(max/2).toFixed(0)}`, padding - 5, chartH / 2);
+ ctx2.fillText(`0`, padding - 5, chartH);
+ 
+ // Başlık
+ ctx2.textAlign = 'left';
+ ctx2.fillStyle = 'rgba(148,163,184,0.8)';
+ ctx2.font = '11px -apple-system, sans-serif';
+ ctx2.fillText('PM2.5 (24 Saat)', padding, 12);
+ 
+ // Çizgi grafiği
+ ctx2.save();
+ ctx2.translate(padding, 0);
+ 
+ ctx2.beginPath();
+ vals.forEach((v, i) => {
+   const x = (i / (vals.length - 1)) * chartW;
+   const y = chartH - (v / max) * (chartH - 20);
+   if(i === 0) ctx2.moveTo(x, y);
+   else ctx2.lineTo(x, y);
+ });
+ 
+ ctx2.strokeStyle = 'rgba(56,189,248,0.8)';
+ ctx2.lineWidth = 2.5;
+ ctx2.stroke();
+ 
+ // Dolgu efekti
+ ctx2.lineTo(chartW, chartH);
+ ctx2.lineTo(0, chartH);
+ ctx2.closePath();
+ ctx2.fillStyle = 'rgba(56,189,248,0.15)';
+ ctx2.fill();
+ 
+ // Noktalar (her 4 saatte bir)
+ ctx2.fillStyle = 'rgba(56,189,248,0.9)';
+ for(let i = 0; i < vals.length; i += 4) {
+   const x = (i / (vals.length - 1)) * chartW;
+   const y = chartH - (vals[i] / max) * (chartH - 20);
+   
+   ctx2.beginPath();
+   ctx2.arc(x, y, 3, 0, 2 * Math.PI);
+   ctx2.fill();
+   
+   // Saat etiketi
+   ctx2.fillStyle = 'rgba(148,163,184,0.6)';
+   ctx2.font = '9px -apple-system, sans-serif';
+   ctx2.textAlign = 'center';
+   ctx2.fillText(`${i}:00`, x, chartH + 12);
+   ctx2.fillStyle = 'rgba(56,189,248,0.9)';
+ }
+ 
+ ctx2.restore();
+}
+
+document.getElementById('locate').onclick = () => {
+ if(!navigator.geolocation){
+   alert('❌ Tarayıcınız konum servisini desteklemiyor.');
+   return;
+ }
+ 
+ // Buton durumunu güncelle
+ const btn = document.getElementById('locate');
+ const originalText = btn.innerHTML;
+ btn.innerHTML = '⏳ Konum alınıyor...';
+ btn.disabled = true;
+ 
+ navigator.geolocation.getCurrentPosition(
+   position => {
+     btn.innerHTML = originalText;
+     btn.disabled = false;
+     fetchData(position.coords.latitude, position.coords.longitude, "Konumum");
+   },
+   error => {
+     btn.innerHTML = originalText;
+     btn.disabled = false;
+     
+     let message = 'Konum alınamadı: ';
+     switch(error.code) {
+       case error.PERMISSION_DENIED:
+         message += 'Konum izni reddedildi. Tarayıcı ayarlarından konum iznini açın.';
+         break;
+       case error.POSITION_UNAVAILABLE:
+         message += 'Konum bilgisi mevcut değil.';
+         break;
+       case error.TIMEOUT:
+         message += 'Konum isteği zaman aşımına uğradı.';
+         break;
+       default:
+         message += 'Bilinmeyen bir hata oluştu.';
+     }
+     alert('❌ ' + message);
+     console.error('Geolocation error:', error);
+   },
+   {
+     enableHighAccuracy: true,
+     timeout: 10000,
+     maximumAge: 0
+   }
+ );
+};
+
+document.getElementById('refresh').onclick = () => {
+ const coords = document.getElementById('latlon').innerText.split(',').map(s => parseFloat(s.trim()));
+ if(coords.length === 2) {
+   fetchData(coords[0], coords[1], document.getElementById('place').innerText);
+ }
+};
+
+initMap();
+</script>
+</body>
+</html>

@@ -170,6 +170,13 @@
                     return Promise.resolve(true); // Harici linkler her zaman aktif
                 }
                 
+                // Eğer image varsa (analog/pen&paper), image kontrolü yap
+                if (challenge.image) {
+                    return fetch(challenge.image, { method: 'HEAD' })
+                        .then(response => response.ok)
+                        .catch(() => false);
+                }
+                
                 const dayStr = challenge.day.toString().padStart(2, '0');
                 const url = `maps/day${dayStr}.html`;
                 
@@ -190,9 +197,18 @@
                 const card = document.createElement('div');
                 const cardClass = isCompleted ? 'card completed' : 'card disabled';
                 
-                // Harici URL varsa onu kullan, yoksa yerel HTML dosyasını kullan
-                const linkHref = challenge.url ? challenge.url : (isCompleted ? `maps/day${dayStr}.html` : '#');
-                const linkTarget = challenge.url ? '_blank' : '_self';
+                // Link belirleme: URL, image veya HTML dosyası
+                let linkHref, linkTarget;
+                if (challenge.url) {
+                    linkHref = challenge.url;
+                    linkTarget = '_blank';
+                } else if (challenge.image) {
+                    linkHref = challenge.image;
+                    linkTarget = '_blank';
+                } else {
+                    linkHref = isCompleted ? `maps/day${dayStr}.html` : '#';
+                    linkTarget = '_self';
+                }
                 
                 card.className = cardClass;
                 card.innerHTML = `
