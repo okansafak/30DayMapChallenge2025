@@ -4,106 +4,271 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>#30DayMapChallenge 2025 - Proje Galerisi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #1c1e21;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #1c1e21;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
+        
+        /* Header Styles */
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
+            padding: 60px 20px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
+        
         .header h1 {
-            font-size: 2.5rem;
+            font-size: 3.5rem;
+            font-weight: 700;
             color: #1a1a1a;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
         }
+        
         .header p {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: #606770;
+            margin-bottom: 20px;
         }
-        .header .tags {
-            margin-top: 10px;
+        
+        .header .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 25px;
+            flex-wrap: wrap;
         }
-        .header .tag {
-            display: inline-block;
-            background-color: #e7f3ff;
-            color: #1877f2;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.9rem;
+        
+        .stat-item {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
             font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
+        
+        .stat-item span {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        /* Grid Styles */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
         }
+        
+        /* Card Styles */
         .card {
-            background-color: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            border-left: 5px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 1px solid #e0e0e0;
         }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #2ecc71;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card.completed::before {
+            opacity: 1;
+        }
+        
         .card a {
             text-decoration: none;
             color: inherit;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            padding: 20px;
+            display: block;
         }
-        .card.completed {
-             border-left-color: #31a24c;
-        }
+        
         .card.completed:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
+        
         .card.disabled {
-            border-left-color: #d1d1d1;
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
         }
+        
         .card.disabled a {
             pointer-events: none;
         }
+        
+        /* Preview Image */
+        .card-preview {
+            width: 100%;
+            height: 220px;
+            background: #f8f9fa;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            pointer-events: none;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card.completed:hover .card-preview iframe {
+            transform: scale(1.05);
+        }
+        
+        .card-preview.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        .card-preview .preview-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Card Content */
+        .card-body {
+            padding: 24px;
+        }
+        
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
+        
         .card-header .day {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #1877f2;
+            color: #2c3e50;
         }
+        
         .card-header .date {
-            font-size: 0.9rem;
-            color: #606770;
+            font-size: 0.85rem;
+            color: #999;
+            font-weight: 500;
         }
+        
         .card-content h3 {
-            margin: 0 0 8px 0;
-            font-size: 1.2rem;
+            margin: 0 0 10px 0;
+            font-size: 1.4rem;
             color: #1c1e21;
+            font-weight: 600;
         }
+        
         .card-content p {
             margin: 0;
             font-size: 0.95rem;
             color: #606770;
-            line-height: 1.5;
-            flex-grow: 1;
+            line-height: 1.6;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-top: 50px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .footer p {
+            color: #606770;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        
+        .footer a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #2ecc71;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+        
+        /* Loading Animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        .card-preview.loading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
         }
     </style>
 </head>
@@ -112,15 +277,30 @@
         <header class="header">
             <h1>#30DayMapChallenge 2025</h1>
             <p>Kasım ayı boyunca her gün yeni bir harita. İşte benim yolculuğum.</p>
-            <div class="tags">
-                <span class="tag">#30DayMapChallenge</span>
-                <span class="tag">#opengisturkiye</span>
+            <div class="stats">
+                <div class="stat-item">
+                    <span id="completed-count">0</span> / 30 Tamamlandı
+                </div>
+                <div class="stat-item">
+                    #30DayMapChallenge
+                </div>
+                <div class="stat-item">
+                    #opengisturkiye
+                </div>
             </div>
         </header>
 
         <div class="grid" id="challenge-grid">
             <!-- JavaScript burayı otomatik olarak dolduracak -->
         </div>
+        
+        <footer class="footer">
+            <p>🗺️ Tüm haritalar MapLibre GL JS, Leaflet.js ve açık kaynak teknolojilerle yapılmıştır.</p>
+            <p>
+                <a href="https://github.com/okansafak/30DayMapChallenge2025" target="_blank">GitHub'da Görüntüle</a> • 
+                <a href="https://www.linkedin.com/in/okansafak/" target="_blank">LinkedIn</a>
+            </p>
+        </footer>
     </div>
 
     <script>
@@ -159,18 +339,46 @@
 
         const grid = document.getElementById('challenge-grid');
 
-        // --- YENİ VE OTOMATİK ÇALIŞAN KOD ---
+        // Önizleme oluşturma
+        function createPreview(challenge, dayStr) {
+            let previewHTML = '';
+            
+            if (challenge.url) {
+                // Harici linkler için simge
+                previewHTML = `
+                    <div class="card-preview loading">
+                        <div style="font-size: 3rem;">🔗</div>
+                        <div class="preview-overlay">External Link</div>
+                    </div>
+                `;
+            } else if (challenge.image) {
+                // Resim önizlemesi
+                previewHTML = `
+                    <div class="card-preview">
+                        <img src="${challenge.image}" alt="${challenge.theme}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div class="preview-overlay">Analog</div>
+                    </div>
+                `;
+            } else {
+                // İframe önizleme
+                previewHTML = `
+                    <div class="card-preview">
+                        <iframe src="maps/day${dayStr}.html" scrolling="no"></iframe>
+                        <div class="preview-overlay">Live Preview</div>
+                    </div>
+                `;
+            }
+            
+            return previewHTML;
+        }
 
-        // Bu asenkron fonksiyon, tüm dosya kontrollerini yapar ve ardından kartları oluşturur.
+        // Grid oluşturma fonksiyonu
         async function buildChallengeGrid() {
-            // Her gün için bir dosya varlığı kontrolü (promise) oluştur.
             const checkPromises = challenges.map(challenge => {
-                // Eğer challenge'ın kendi URL'i varsa, bunu kullan (harici link için)
                 if (challenge.url) {
-                    return Promise.resolve(true); // Harici linkler her zaman aktif
+                    return Promise.resolve(true);
                 }
                 
-                // Eğer image varsa (analog/pen&paper), image kontrolü yap
                 if (challenge.image) {
                     return fetch(challenge.image, { method: 'HEAD' })
                         .then(response => response.ok)
@@ -180,24 +388,23 @@
                 const dayStr = challenge.day.toString().padStart(2, '0');
                 const url = `maps/day${dayStr}.html`;
                 
-                // 'HEAD' metodu, dosyanın tamamını indirmeden sadece var olup olmadığını kontrol eder.
                 return fetch(url, { method: 'HEAD' })
-                    .then(response => response.ok) // Dosya varsa (status 200), 'true' döner.
-                    .catch(() => false); // Dosya yoksa (status 404) veya hata varsa, 'false' döner.
+                    .then(response => response.ok)
+                    .catch(() => false);
             });
 
-            // Tüm kontrol işlemlerinin bitmesini bekle.
-            const results = await Promise.all(checkPromises); // Örn: [true, false, false, ...]
+            const results = await Promise.all(checkPromises);
+            let completedCount = 0;
 
-            // Sonuçlara göre kartları oluştur.
             challenges.forEach((challenge, index) => {
-                const isCompleted = results[index]; // O günün dosyası var mı?
+                const isCompleted = results[index];
                 const dayStr = challenge.day.toString().padStart(2, '0');
+                
+                if (isCompleted) completedCount++;
                 
                 const card = document.createElement('div');
                 const cardClass = isCompleted ? 'card completed' : 'card disabled';
                 
-                // Link belirleme: URL, image veya HTML dosyası
                 let linkHref, linkTarget;
                 if (challenge.url) {
                     linkHref = challenge.url;
@@ -211,23 +418,36 @@
                 }
                 
                 card.className = cardClass;
+                
+                const previewHTML = isCompleted ? createPreview(challenge, dayStr) : `
+                    <div class="card-preview loading">
+                        <div style="font-size: 3rem;">🗺️</div>
+                    </div>
+                `;
+                
                 card.innerHTML = `
                     <a href="${linkHref}" target="${linkTarget}">
-                        <div class="card-header">
-                            <span class="day">Gün ${dayStr}</span>
-                            <span class="date">${challenge.date}</span>
-                        </div>
-                        <div class="card-content">
-                            <h3>${challenge.theme}</h3>
-                            <p>${challenge.description}</p>
+                        ${previewHTML}
+                        <div class="card-body">
+                            <div class="card-header">
+                                <span class="day">GÜN ${dayStr}</span>
+                                <span class="date">${challenge.date}</span>
+                            </div>
+                            <div class="card-content">
+                                <h3>${challenge.theme}</h3>
+                                <p>${challenge.description}</p>
+                            </div>
                         </div>
                     </a>
                 `;
                 grid.appendChild(card);
             });
+            
+            // Tamamlanan gün sayısını güncelle
+            document.getElementById('completed-count').textContent = completedCount;
         }
 
-        // Sayfa yüklendiğinde fonksiyonu çalıştır.
+        // Sayfa yüklendiğinde fonksiyonu çalıştır
         buildChallengeGrid();
 
     </script>

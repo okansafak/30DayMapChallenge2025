@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gün 12: 2125 İstanbul - Ekolojik Rönesans</title>
+    <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0e1a;
+            color: #00ff9d;
+            overflow: hidden;
+        }
+        
+        #map { 
+            position: absolute; 
+            top: 0; 
+            bottom: 0; 
+            width: 100%;
+            background: #0a0e1a;
+        }
+        
+        /* Fütüristik Header */
+        .header {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 25px 30px;
+            border-radius: 0;
+            border-left: 4px solid #00ff9d;
+            border-top: 1px solid rgba(0, 255, 157, 0.3);
+            border-bottom: 1px solid rgba(0, 255, 157, 0.3);
+            z-index: 10;
+            max-width: 450px;
+            box-shadow: 0 0 40px rgba(0, 255, 157, 0.2);
+        }
+        
+        .day-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff9d, #00d4ff);
+            color: #0a0e1a;
+            padding: 5px 15px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 12px;
+            clip-path: polygon(0 0, 90% 0, 100% 100%, 10% 100%);
+        }
+        
+        .header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            font-weight: 900;
+            margin: 0 0 8px 0;
+            color: #00ff9d;
+            text-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        .header .year {
+            font-size: 48px;
+            font-weight: 900;
+            color: #00d4ff;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 8px 0;
+        }
+        
+        /* Data Panel */
+        .data-panel {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 0;
+            border-right: 4px solid #00d4ff;
+            border-top: 1px solid rgba(0, 212, 255, 0.3);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            z-index: 10;
+            width: 280px;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+        }
+        
+        .data-panel h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 255, 157, 0.1);
+        }
+        
+        .metric:last-child { border-bottom: none; }
+        
+        .metric-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .metric-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: #00ff9d;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.4);
+        }
+        
+        .metric-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 255, 157, 0.1);
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff9d, #00d4ff);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        /* Legend */
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 0;
+            border-left: 4px solid #00ff9d;
+            z-index: 10;
+            border-top: 1px solid rgba(0, 255, 157, 0.2);
+            border-bottom: 1px solid rgba(0, 255, 157, 0.2);
+        }
+        
+        .legend h4 {
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #00ff9d;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 3px;
+            margin-right: 10px;
+            box-shadow: 0 0 8px currentColor;
+        }
+        
+        .legend-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Back Button */
+        .back-button {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            color: #00ff9d;
+            text-decoration: none;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+            z-index: 2;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        .back-button:hover {
+            background: rgba(0, 255, 157, 0.1);
+            border-color: #00ff9d;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.3);
+            transform: translateX(-5px);
+        }
+        
+        /* Scan Lines Effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 157, 0.03) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(0, 255, 157, 0.03) 3px
+            );
+            animation: scan 8s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+        
+        /* Loading Animation */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1000;
+            font-family: 'Orbitron', monospace;
+            color: #00ff9d;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 255, 157, 0.1);
+            border-top: 3px solid #00ff9d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <div>INITIALIZING FUTURE MAP...</div>
+    </div>
+    
+    <a href="../index.html" class="back-button">← RETURN</a>
+    <div id="map"></div>
+    
+    <div class="header">
+        <div class="day-badge">DAY 12</div>
+        <div class="year">2125</div>
+        <h1>İSTANBUL</h1>
+        <p><strong>Kanal İstanbul ve Marmara'nın Ekolojik Rönesansı</strong></p>
+        <p style="font-size: 12px; margin-top: 12px; color: rgba(0, 255, 157, 0.7);">
+            Yeşil teknoloji, dikey ormanlar ve biyoçeşitlilik ağının buluştuğu gelecek vizyonu.
+        </p>
+    </div>
+    
+    <div class="data-panel">
+        <h3>REAL-TIME METRICS</h3>
+        <div class="metric">
+            <span class="metric-label">Yeşil Alan</span>
+            <span class="metric-value">73%</span>
+        </div>
+        <div class="metric-bar">
+            <div class="metric-bar-fill" style="width: 73%"></div>
+        </div>
+        
+        <div class="metric">
+            <span class="metric-label">Dikey Orman</span>
+            <span class="metric-value">2,840</span>
+        </div>
+        <div class="metric-bar">
+            <div class="metric-bar-fill" style="width: 95%"></div>
+        </div>
+        
+        <div class="metric">
+            <span class="metric-label">Biyoçeşitlilik</span>
+            <span class="metric-value">+384%</span>
+        </div>
+        <div class="metric-bar">
+            <div class="metric-bar-fill" style="width: 88%"></div>
+        </div>
+        
+        <div class="metric">
+            <span class="metric-label">Hava Kalitesi</span>
+            <span class="metric-value">98/100</span>
+        </div>
+        <div class="metric-bar">
+            <div class="metric-bar-fill" style="width: 98%"></div>
+        </div>
+    </div>
+    
+    <div class="legend">
+        <h4>KATMANLAR</h4>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #00ff9d;"></div>
+            <span class="legend-label">Kanal İstanbul Koridoru</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #4ade80;"></div>
+            <span class="legend-label">Dikey Orman Binaları</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #00d4ff;"></div>
+            <span class="legend-label">Canlı Biyoçeşitlilik Akışı</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #60a5fa;"></div>
+            <span class="legend-label">Su Yolları & Ekosistem</span>
+        </div>
+    </div>
+
+    <script>
+        // Kanal İstanbul GeoJSON (Küçükçekmece-Karadeniz arası)
+        const kanalIstanbul = {
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": { "name": "Kanal İstanbul", "type": "canal" },
+                "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                        [28.7850, 41.0200], // Küçükçekmece (Marmara)
+                        [28.7840, 41.0400],
+                        [28.7830, 41.0600],
+                        [28.7820, 41.0800],
+                        [28.7810, 41.1000],
+                        [28.7800, 41.1200],
+                        [28.7790, 41.1400],
+                        [28.7780, 41.1600],
+                        [28.7770, 41.1800],
+                        [28.7760, 41.2000] // Karadeniz
+                    ]
+                }
+            }]
+        };
+        
+        // Dikey Orman Binaları (İstanbul genelinde)
+        const verticalForests = {
+            "type": "FeatureCollection",
+            "features": []
+        };
+        
+        // İstanbul'un farklı bölgelerinde dikey ormanlar
+        const forestLocations = [
+            [28.9784, 41.0082], // Fatih
+            [29.0200, 41.0300], // Üsküdar
+            [29.0400, 41.0500], // Kadıköy
+            [28.8500, 41.0100], // Bakırköy
+            [29.1200, 41.0800], // Beykoz
+            [28.7300, 41.0200], // Avcılar
+            [29.0100, 41.1100], // Beşiktaş
+            [28.9500, 41.0600], // Şişli
+            [29.0800, 41.0200], // Üsküdar
+            [28.8200, 41.0500]  // Bahçelievler
+        ];
+        
+        forestLocations.forEach((coord, i) => {
+            verticalForests.features.push({
+                "type": "Feature",
+                "properties": { 
+                    "name": `Vertical Forest ${i + 1}`,
+                    "height": Math.random() * 150 + 50,
+                    "trees": Math.floor(Math.random() * 500) + 200
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": coord
+                }
+            });
+        });
+        
+        // Marmara'da canlı biyoçeşitlilik akışı için parçacıklar
+        const bioParticles = [];
+        const marmaraBounds = [[27.8, 40.6], [29.4, 41.2]];
+        
+        for (let i = 0; i < 100; i++) {
+            const lon = marmaraBounds[0][0] + Math.random() * (marmaraBounds[1][0] - marmaraBounds[0][0]);
+            const lat = marmaraBounds[0][1] + Math.random() * (marmaraBounds[1][1] - marmaraBounds[0][1]);
+            bioParticles.push({
+                lon: lon,
+                lat: lat,
+                vx: (Math.random() - 0.5) * 0.0002,
+                vy: (Math.random() - 0.5) * 0.0002
+            });
+        }
+
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {},
+                layers: [{
+                    id: 'background',
+                    type: 'background',
+                    paint: {
+                        'background-color': '#000000'
+                    }
+                }],
+                glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
+            },
+            center: [28.95, 41.08],
+            zoom: 9.5,
+            pitch: 45,
+            bearing: 0,
+            antialias: true
+        });
+
+        map.on('load', () => {
+            document.getElementById('loading').style.display = 'none';
+            
+            // 0. İlçe Sınırları (Fütüristik Hologram)
+            map.addSource('ilceler', {
+                type: 'geojson',
+                data: '../data/ilceler.geojson'
+            });
+            
+            // İlçe dolgu - karanlık ve yarı saydam
+            map.addLayer({
+                id: 'ilceler-fill',
+                type: 'fill',
+                source: 'ilceler',
+                paint: {
+                    'fill-color': '#0a0e1a',
+                    'fill-opacity': 0.4
+                }
+            });
+            
+            // İlçe sınırları - neon çizgiler
+            map.addLayer({
+                id: 'ilceler-outline',
+                type: 'line',
+                source: 'ilceler',
+                paint: {
+                    'line-color': [
+                        'case',
+                        ['==', ['get', 'NAME_3'], 'Küçükçekmece'], '#00ff9d', // Kanal bölgesi
+                        ['==', ['get', 'NAME_3'], 'Arnavutköy'], '#00ff9d',
+                        ['==', ['get', 'NAME_3'], 'Başakşehir'], '#00ff9d',
+                        ['==', ['get', 'NAME_3'], 'Eyüp'], '#00ff9d',
+                        '#00d4ff' // Diğer ilçeler
+                    ],
+                    'line-width': 1.5,
+                    'line-opacity': 0.6,
+                    'line-blur': 0.5
+                }
+            });
+            
+            // İlçe sınırları glow efekti
+            map.addLayer({
+                id: 'ilceler-glow',
+                type: 'line',
+                source: 'ilceler',
+                paint: {
+                    'line-color': [
+                        'case',
+                        ['==', ['get', 'NAME_3'], 'Küçükçekmece'], '#00ff9d',
+                        ['==', ['get', 'NAME_3'], 'Arnavutköy'], '#00ff9d',
+                        ['==', ['get', 'NAME_3'], 'Başakşehir'], '#00ff9d',
+                        ['==', ['get', 'NAME_3'], 'Eyüp'], '#00ff9d',
+                        '#00d4ff'
+                    ],
+                    'line-width': 4,
+                    'line-opacity': 0.2,
+                    'line-blur': 3
+                }
+            });
+            
+            // 1. Kanal İstanbul ve Yeşil Koridor
+            map.addSource('kanal-istanbul', {
+                type: 'geojson',
+                data: kanalIstanbul
+            });
+            
+            // Kanal çizgisi
+            map.addLayer({
+                id: 'kanal-line',
+                type: 'line',
+                source: 'kanal-istanbul',
+                paint: {
+                    'line-color': '#00ff9d',
+                    'line-width': 8,
+                    'line-opacity': 0.9,
+                    'line-blur': 2
+                }
+            });
+            
+            // Kanal etrafında yeşil koridor (glow effect)
+            map.addLayer({
+                id: 'kanal-glow',
+                type: 'line',
+                source: 'kanal-istanbul',
+                paint: {
+                    'line-color': '#00ff9d',
+                    'line-width': 20,
+                    'line-opacity': 0.3,
+                    'line-blur': 10
+                }
+            });
+            
+            // 2. Dikey Orman Binaları (3D Extrusion)
+            map.addSource('vertical-forests', {
+                type: 'geojson',
+                data: verticalForests
+            });
+            
+            map.addLayer({
+                id: 'forests-circle',
+                type: 'circle',
+                source: 'vertical-forests',
+                paint: {
+                    'circle-radius': [
+                        'interpolate', ['linear'], ['zoom'],
+                        8, 5,
+                        12, 15
+                    ],
+                    'circle-color': '#4ade80',
+                    'circle-opacity': 0.8,
+                    'circle-blur': 0.3,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#22c55e',
+                    'circle-stroke-opacity': 0.6
+                }
+            });
+            
+            // Pulse animasyonu için ikinci katman
+            map.addLayer({
+                id: 'forests-pulse',
+                type: 'circle',
+                source: 'vertical-forests',
+                paint: {
+                    'circle-radius': [
+                        'interpolate', ['linear'], ['zoom'],
+                        8, 8,
+                        12, 25
+                    ],
+                    'circle-color': '#4ade80',
+                    'circle-opacity': 0.2,
+                    'circle-blur': 1
+                }
+            });
+            
+            // 3. Marmara Biyoçeşitlilik Akışı
+            animateBioParticles();
+            
+            // 4. Kanal animasyonu
+            animateCanal();
+            
+            // Kamera animasyonu
+            setTimeout(() => {
+                map.easeTo({
+                    bearing: 45,
+                    pitch: 60,
+                    duration: 3000
+                });
+            }, 1000);
+        });
+        
+        // Biyoçeşitlilik parçacıklarını animasyonla güncelle
+        function animateBioParticles() {
+            bioParticles.forEach(p => {
+                p.lon += p.vx;
+                p.lat += p.vy;
+                
+                // Sınırlar içinde tut
+                if (p.lon < marmaraBounds[0][0] || p.lon > marmaraBounds[1][0]) p.vx *= -1;
+                if (p.lat < marmaraBounds[0][1] || p.lat > marmaraBounds[1][1]) p.vy *= -1;
+            });
+            
+            const bioData = {
+                type: 'FeatureCollection',
+                features: bioParticles.map(p => ({
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [p.lon, p.lat]
+                    }
+                }))
+            };
+            
+            if (map.getSource('bio-particles')) {
+                map.getSource('bio-particles').setData(bioData);
+            } else {
+                map.addSource('bio-particles', {
+                    type: 'geojson',
+                    data: bioData
+                });
+                
+                map.addLayer({
+                    id: 'bio-points',
+                    type: 'circle',
+                    source: 'bio-particles',
+                    paint: {
+                        'circle-radius': 3,
+                        'circle-color': '#00d4ff',
+                        'circle-opacity': 0.7,
+                        'circle-blur': 0.5
+                    }
+                });
+            }
+            
+            requestAnimationFrame(animateBioParticles);
+        }
+        
+        // Kanal üzerinde akan efekt
+        let kanalOffset = 0;
+        function animateCanal() {
+            kanalOffset += 0.5;
+            if (kanalOffset > 100) kanalOffset = 0;
+            
+            map.setPaintProperty('kanal-line', 'line-dasharray', [2, 4]);
+            map.setPaintProperty('kanal-line', 'line-gap-width', kanalOffset % 10);
+            
+            requestAnimationFrame(animateCanal);
+        }
+        
+        // Popup ekle
+        map.on('click', 'forests-circle', (e) => {
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const props = e.features[0].properties;
+            
+            new maplibregl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(`
+                    <div style="font-family: 'Orbitron', monospace; color: #0a0e1a;">
+                        <h3 style="color: #00ff9d; margin-bottom: 8px;">${props.name}</h3>
+                        <p><strong>Yükseklik:</strong> ${Math.round(props.height)}m</p>
+                        <p><strong>Ağaç Sayısı:</strong> ${props.trees}</p>
+                        <p style="margin-top: 8px; font-size: 11px; color: #666;">
+                            CO₂ Emilimi: ${(props.trees * 22).toFixed(0)} kg/yıl
+                        </p>
+                    </div>
+                `)
+                .addTo(map);
+        });
+        
+        map.on('mouseenter', 'forests-circle', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        
+        map.on('mouseleave', 'forests-circle', () => {
+            map.getCanvas().style.cursor = '';
+        });
+    </script>
+</body>
+</html>
