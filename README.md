@@ -179,6 +179,41 @@ Gerçek zamanlı hava kalitesi verilerini görselleştiren, interaktif hava duru
 - 🔴 **Kötü (101-150)**: Hassas gruplar etkilenir
 - 🟣 **Çok Kötü (150+)**: Herkes için sağlıksız
 
+---
+
+### Day 11: Minimal Map ⬜
+**İstanbul Boğazı - Negatif Alan Yöntemi**
+
+Siyah-beyaz kontrast ile İstanbul Boğazı'nın en minimalist haritası. Sadece kara parçaları ve boşluk - başka hiçbir şey yok.
+
+- 📁 Dosya: `maps/day11.html`
+- 📊 Veri: `data/ilceler.geojson`
+
+#### Özellikler
+- ✅ **Negatif alan tekniği**: Beyaz arka plan = Deniz, Siyah poligon = Kara
+- ✅ **Tam minimalizm**: Sadece iki renk, hiçbir etiket, tamamen statik
+- ✅ **Boğaz odaklı**: Zoom 10, merkez Boğaz üzerinde
+- ✅ **Kaligrafik estetik**: "Boğaz'ın Kaligrafisi" - zarif tipografi
+- ✅ **İnteraktivite yok**: Harita tamamen statik, sanat eseri gibi
+- ✅ **Saf geometri**: Sadece kara parçalarının silueti
+
+#### Tasarım Felsefesi
+> "Minimalizmin gücü: Az çok demektir. Siyah-beyaz kontrast ile İstanbul Boğazı'nın en saf hali. Sadece kara parçaları ve boşluk - başka hiçbir şey yok."
+
+#### Teknik Detaylar
+- **MapLibre GL JS** v3.6.2
+- **Negatif Alan Yöntemi**: Kıyıları çizmek yerine, kara parçalarını doldurarak denizi ortaya çıkarma
+- **Static Map**: `interactive: false` - Zoom, pan, rotation devre dışı
+- **Monochrome**: Sadece #000000 (siyah) ve #ffffff (beyaz)
+- **Typography**: 2rem font-weight 300 ile zarif İstanbul imzası
+
+#### Görsel Kompozisyon
+- Sol üst: Minimal info card (GÜN 11, açıklama)
+- Sağ alt: Siyah kutu içinde beyaz "İstanbul" yazısı ve "Boğaz'ın Kaligrafisi" alt yazısı
+- Merkez: Boğaz'ın siyah-beyaz silueti
+
+---
+
 ## 📊 Veri Setleri
 
 ```

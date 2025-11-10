@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gün 11: Minimal Map - Boğaz'ın Kaligrafisi</title>
+    <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        #map { 
+            position: absolute; 
+            top: 0; 
+            bottom: 0; 
+            width: 100%;
+            background-color: #ffffff; 
+        }
+        .info-box {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 18px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            max-width: 260px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .day {
+            display: inline-block;
+            background: #000;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .info-box h1 { 
+            font-size: 16px; 
+            margin: 0 0 4px 0; 
+            font-weight: 700;
+            color: #000;
+        }
+        .info-box .subtitle { 
+            font-size: 11px; 
+            margin: 0 0 8px 0; 
+            color: #666;
+            font-weight: 600;
+        }
+        .info-box .description { 
+            font-size: 11px; 
+            margin: 0; 
+            color: #666;
+            line-height: 1.5;
+        }
+        .signature {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            text-align: right;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 20px;
+            border-radius: 8px;
+        }
+        .signature h2 { 
+            font-size: 2rem; 
+            margin: 0; 
+            font-weight: 300;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+        .signature p { 
+            font-size: 1rem; 
+            margin: 5px 0 0 0; 
+            color: #cccccc;
+            font-style: italic;
+        }
+        .back-button {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0,0,0,0.1);
+            color: #333;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-button">❮ Ana Sayfa</a>
+    <div id="map"></div>
+    
+    <div class="info-box">
+        <div class="day">GÜN 11</div>
+        <h1>⬜ Minimal Map</h1>
+        <p class="subtitle">Negatif Alan Yöntemi</p>
+        <p class="description">Siyah-beyaz kontrast ile İstanbul Boğazı'nın en saf hali. Sadece kara parçaları ve boşluk - başka hiçbir şey yok. Minimalizmin gücü: Az çok demektir.</p>
+    </div>
+    
+    <div class="signature">
+        <h2>İstanbul</h2>
+        <p>Boğaz'ın Kaligrafisi</p>
+    </div>
+
+    <script>
+        const map = new maplibregl.Map({
+            container: 'map',
+            // Stil tanımını doğrudan burada yapıyoruz
+            style: {
+                version: 8,
+                sources: {
+                    // Kaynağımızı tanımlıyoruz
+                    'land-source': {
+                        type: 'geojson',
+                        data: '../data/ilceler.geojson' // Türkiye kara parçaları verisi
+                    }
+                },
+                // Katman listesi boş başlayacak
+                layers: [] 
+            },
+            center: [29.01, 41.08], // Boğaz'ın tam merkezine odaklanalım
+            zoom: 10.5,
+            interactive: false, // Haritayı tamamen statik yapıyoruz, kaydırma/yakınlaştırma yok
+            antialias: true
+        });
+
+        map.on('load', () => {
+            // Haritanın arka planını, yani "denizi" beyaz yap
+            map.setPaintProperty('background', 'background-color', '#ffffff');
+
+            // Kara parçalarını (poligonları) siyah bir dolgu ile çiz
+            map.addLayer({
+                id: 'land-fill',
+                type: 'fill',
+                source: 'land-source',
+                paint: {
+                    'fill-color': '#000000' // Kara parçaları siyah
+                }
+            });
+
+            // NEGATİF ALAN YÖNTEMİ:
+            // Bu yöntemle aslında kıyıları çizmiyoruz.
+            // Sadece kara parçalarını siyahla dolduruyoruz.
+            // Haritanın beyaz olan arka planı, otomatik olarak denizleri ve boğazı oluşturuyor.
+            // Bu, en minimalist yaklaşımdır.
+        });
+    </script>
+</body>
+</html>
